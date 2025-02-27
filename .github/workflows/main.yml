@@ -24,8 +24,13 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Build Project
-        run: npm run build
+      - name: Build Main Branch
+        if: github.ref == 'refs/heads/main'
+        run: npm run build:main
+
+      - name: Build Dev Branch
+        if: github.ref == 'refs/heads/dev'
+        run: npm run build:dev
 
       - name: Deploy Main Branch
         if: github.ref == 'refs/heads/main'
