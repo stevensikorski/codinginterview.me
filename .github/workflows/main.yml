@@ -26,15 +26,17 @@ jobs:
         run: npm install
 
       - name: Setup Google Authentication
-        run: echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > "$HOME/firebase-key.json"
+        run: echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" | base64 --decode > "$HOME/firebase-key.json"
 
       - name: Build Main Branch
         run: npm run build
 
       - name: Deploy to Firebase Main
         env:
-          GOOGLE_APPLICATION_CREDENTIALS: $HOME/firebase-key.json
-        run: firebase deploy --only hosting:main
+          GOOGLE_APPLICATION_CREDENTIALS: "$HOME/firebase-key.json"
+        run: |
+          export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-key.json"
+          firebase deploy --only hosting:main
 
   deploy-dev:
     if: github.ref == 'refs/heads/dev'
@@ -55,12 +57,14 @@ jobs:
         run: npm install
 
       - name: Setup Google Authentication
-        run: echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > "$HOME/firebase-key.json"
+        run: echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" | base64 --decode > "$HOME/firebase-key.json"
 
       - name: Build Dev Branch
         run: npm run build
 
       - name: Deploy to Firebase Dev
         env:
-          GOOGLE_APPLICATION_CREDENTIALS: $HOME/firebase-key.json
-        run: firebase deploy --only hosting:dev
+          GOOGLE_APPLICATION_CREDENTIALS: "$HOME/firebase-key.json"
+        run: |
+          export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-key.json"
+          firebase deploy --only hosting:dev
