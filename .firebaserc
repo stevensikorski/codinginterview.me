@@ -6,12 +6,13 @@
     "codinginterview-me": {
       "hosting": {
         "main": [
-          "codinginterview.me"
+          "codinginterview-me"
         ],
         "dev": [
-          "codinginterview-me"
+          "codinginterview-me-dev"
         ]
       }
     }
-  }
+  },
+  "etags": {}
 }

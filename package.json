@@ -15,8 +15,6 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "build:main": "react-scripts build && mv build build-main",
-    "build:dev": "react-scripts build && mv build build-dev",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
