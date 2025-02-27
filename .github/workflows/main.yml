@@ -29,7 +29,7 @@ jobs:
         run: echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > "$HOME/firebase-key.json"
 
       - name: Build Main Branch
-        run: npm run build:main
+        run: npm run build
 
       - name: Deploy to Firebase Main
         env:
@@ -58,7 +58,7 @@ jobs:
         run: echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > "$HOME/firebase-key.json"
 
       - name: Build Dev Branch
-        run: npm run build:dev
+        run: npm run build
 
       - name: Deploy to Firebase Dev
         env:
