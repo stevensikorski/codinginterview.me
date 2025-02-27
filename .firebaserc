@@ -1,5 +1,18 @@
 {
   "projects": {
     "default": "codinginterview-me"
-  }
+  },
+  "targets": {
+    "codinginterview-me": {
+      "hosting": {
+        "main": [
+          "codinginterview.me"
+        ],
+        "dev": [
+          "codinginterview-me"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
