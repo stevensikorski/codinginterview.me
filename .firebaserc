@@ -9,8 +9,7 @@
           "codinginterview.me"
         ],
         "dev": [
-          "codinginterview-me.web.app",
-          "codinginterview-me.firebaseapp.com"
+          "codinginterview-me"
         ]
       }
     }
