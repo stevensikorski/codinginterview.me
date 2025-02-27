@@ -9,10 +9,10 @@
           "codinginterview.me"
         ],
         "dev": [
-          "codinginterview-me"
+          "codinginterview-me.web.app",
+          "codinginterview-me.firebaseapp.com"
         ]
       }
     }
-  },
-  "etags": {}
+  }
 }
