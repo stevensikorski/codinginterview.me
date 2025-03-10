@@ -1,30 +1,31 @@
-import logo from './logo.svg';
-import './App.css';
-import Register from "./registration.jsx"
+// ExpressJS Middleware
+import express from 'express';
+
+// Firebase settings & SDK
+import { firebase } from './firebase-config.js'; // Firebase API object and initialized firebase object
+import { getAuth } from 'firebase/auth'; // Firebase authentication service object
+import { getDatabase } from 'firebase/database';
+
+// Other custom modules 
+import { registerUserRoutes } from './user_registration/registration.jsx'; // For Account registration 
 
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn Reacts
-        </a>
-      </header>
-      <div className="signup">
-        <Register />
-      </div>
-    </div>
-  );
-}
+// Initialize backend 
+const app = express();
+const port = process.env.BACKEND_PORT;
 
-export default App;
+// Middleware to parse form data (application/x-www-form-urlencoded)
+app.use('/', express.urlencoded({ extended: true }));
+
+// Initialize the firebase services the app uses
+const firebase_auth = getAuth()
+const firebase_db = getDatabase(firebase)
+
+// Initialize the routes for imported js files
+// registration.js
+registerUserRoutes(app, firebase_auth) 
+
+// Start the server
+app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
+});

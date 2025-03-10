@@ -1,6 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
-import Register from "./registration.jsx"
+import Register from "./user_registration/registration.jsx"
 
 
 function App() {

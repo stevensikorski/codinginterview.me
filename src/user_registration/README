@@ -1,0 +1,3 @@
+This directory contains the backend logic for user registration.
+Currently, the supported types are:
+1. Email-password registration 
