@@ -6,7 +6,7 @@ const handleRegistration = async (firebase_auth, email, password) => {
         // Await the user creation process
         const userCred = await createUserWithEmailAndPassword(firebase_auth, email, password);
         const user = userCred.user;
-    
+        
         console.log("User signed up: ", user);        
     } catch (error) {
         console.error("Error signing up:", error.message);
@@ -26,8 +26,8 @@ const registerUserRoutes = (app, firebase_auth) => {
         // res.send(`Form submitted! Email: ${email}`);
 
         // Redirecting user to another path
-        console.log('redirecting user...')
-        res.redirect('https://example.com')
+        // console.log('redirecting user...')
+        res.redirect('http://localhost:3000/')
     })
 };
 

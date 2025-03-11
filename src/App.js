@@ -2,12 +2,12 @@
 import express from 'express';
 
 // Firebase settings & SDK
-import { firebase } from './firebase-config.js'; // Firebase API object and initialized firebase object
+import { firebase } from './backend/config_files/firebase-config.js'; // Firebase API object and initialized firebase object
 import { getAuth } from 'firebase/auth'; // Firebase authentication service object
 import { getDatabase } from 'firebase/database';
 
 // Other custom modules 
-import { registerUserRoutes } from './user_registration/registration.jsx'; // For Account registration 
+import { registerUserRoutes } from './backend/account_registration/account_registration.js'; // For Account registration 
 
 
 // Initialize backend 
