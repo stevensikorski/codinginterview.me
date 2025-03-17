@@ -10,7 +10,7 @@ export default function Header({ openModal }) {
             <a href="/" className="text-2xl font-semibold text-dark">
               <figure>
                 <img
-                  className="size-20 object-contain"
+                  className="size-28 object-contain"
                   src="/logo.webp"
                   alt="logo.webp"
                 />
@@ -27,7 +27,7 @@ export default function Header({ openModal }) {
                       href="index.html"
                       className="text-[13px] text-dark-100 leading-tight hover:font-bold group-[.active]/link:font-bold transition-all"
                     >
-                      HOMEE
+                      HOME
                     </a>
                   </li>
                   {/*sign in button - opens login popup*/}
