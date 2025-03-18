@@ -13,7 +13,7 @@ import Register from "./components/Account_Registration/AccountRegistration";
 import SolveProblem from "./components/Home/SolveProblem";
 import Footer from "./components/shared/Footer";
 import Header from "./components/shared/Header";
-import CodeEditor from "./components/Development_Environment/CodeEditor";
+import DevelopmentEnvironmentPage from "./components/Development_Environment/EditorPage";
 
 function App() {
   //routing capabilities
@@ -73,7 +73,7 @@ export default function Main() {
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/editor" element={<CodeEditor />} />
+        <Route path="/editor" element={<DevelopmentEnvironmentPage />} />
       </Routes>
     </Router>
   );

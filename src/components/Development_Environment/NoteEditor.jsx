@@ -1,14 +1,7 @@
 import React, { useState } from "react";
 import Editor from "@monaco-editor/react";
 
-export default function CodeEditor() {
-  const starterCode = `# Time Complexity:
-# Space Complexity:
-  
-class Solution:
-    def function(self):
-        return`;
-
+export default function MarkdownEditor() {
   const [position, setPosition] = useState({ line: 1, column: 1 });
 
   const handleEditorMount = (editor) => {
@@ -18,7 +11,7 @@ class Solution:
   };
 
   return (
-    <div className="flex flex-grow flex-col rounded-b-xl">
+    <div className="flex flex-col flex-grow rounded-b-xl">
       {/* Header */}
       <div className="flex px-2 border-b text-neutral-700 border-neutral-800">
         <button className="p-1 text-sm font-semibold hover:text-neutral-600 transition duration-200">Option 1</button>
@@ -26,28 +19,33 @@ class Solution:
         <button className="p-1 text-sm font-semibold hover:text-neutral-600 transition duration-200">Option 3</button>
       </div>
 
-      {/* Editor Wrapper */}
-      <div className="flex flex-col flex-grow">
-        <Editor
-          height="100%"
-          defaultLanguage="python"
-          defaultValue={starterCode}
-          theme="vs-dark"
-          loading={""}
-          onMount={handleEditorMount}
-          options={{
-            automaticLayout: true,
-            minimap: { enabled: false },
-            padding: { top: 10, bottom: 10, right: 8 },
-            scrollbar: { useShadows: false },
-            stickyScroll: { enabled: false },
-            insertSpaces: true,
-            scrollBeyondLastLine: false,
-            wordWrap: "on",
-            fontSize: 14,
-          }}
-        />
-      </div>
+      {/* Editor */}
+      <Editor
+        height="100%"
+        defaultLanguage="markdown"
+        theme="vs-dark"
+        loading={""}
+        onMount={handleEditorMount}
+        options={{
+          automaticLayout: true,
+          minimap: { enabled: false },
+          padding: { top: 10, bottom: 10, left: 10, right: 10 },
+          scrollbar: { useShadows: false, vertical: "auto", horizontal: "auto" },
+          stickyScroll: { enabled: false },
+          insertSpaces: true,
+          scrollBeyondLastLine: false,
+          wordWrap: "on",
+          fontSize: 14,
+          lineNumbers: "on",
+          renderLineHighlight: "none",
+          overviewRulerBorder: false,
+          folding: false,
+          guides: { indentation: false },
+          suggest: { snippetsPreventQuickSuggestions: false },
+          quickSuggestions: false,
+          parameterHints: { enabled: false },
+        }}
+      />
 
       {/* Footer */}
       <div className="px-2 border-t text-neutral-600 border-neutral-800">
