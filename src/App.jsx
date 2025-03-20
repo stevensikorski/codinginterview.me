@@ -14,6 +14,7 @@ import SolveProblem from "./components/Home/SolveProblem";
 import Footer from "./components/shared/Footer";
 import Header from "./components/shared/Header";
 import DevelopmentEnvironmentPage from "./components/Development_Environment/EditorPage";
+import AuthenticatedPage from "./components/AuthenticatedPage/AuthenticatedPage";
 
 function App() {
   //routing capabilities
@@ -29,7 +30,7 @@ function App() {
   function handleOpenLoginButtonClick() {
     console.log("User clicked to open login");
     setIsLoginModalOpen(true);
-    navigate("/register");
+    //navigate("/register");
   }
 
   //closes login popup when X button is clicked
@@ -74,6 +75,7 @@ export default function Main() {
         <Route path="/" element={<App />} />
         <Route path="/register" element={<Register />} />
         <Route path="/editor" element={<DevelopmentEnvironmentPage />} />
+        <Route path="/authenticated" element={<AuthenticatedPage />} />
       </Routes>
     </Router>
   );

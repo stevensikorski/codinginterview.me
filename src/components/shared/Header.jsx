@@ -24,7 +24,7 @@ export default function Header({ openModal }) {
                   {/*home link*/}
                   <li className="group/link active relative">
                     <a
-                      href="index.html"
+                      href="/"
                       className="text-[13px] text-dark-100 leading-tight hover:font-bold group-[.active]/link:font-bold transition-all"
                     >
                       HOME
