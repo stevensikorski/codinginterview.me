@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 
 //React router allows routing to different paths (eg: for redirects)
-import { BrowserRouter as Router, Route, Routes, useNavigate } from "react-router-dom";
+// import { BrowserRouter as Router, Route, Routes, useNavigate } from "react-router-dom"; // commented out for deployment to work
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 //import compononets
 import FindPartner from "./components/Home/FindPartner";
@@ -18,7 +19,7 @@ import AuthenticatedPage from "./components/AuthenticatedPage/AuthenticatedPage"
 
 function App() {
   //routing capabilities
-  const navigate = useNavigate();
+  // const navigate = useNavigate(); // commented out for deployment to work
 
   //login popup show/hide control
   var [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
