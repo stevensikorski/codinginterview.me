@@ -6,12 +6,20 @@ import { firebase } from "./backend/config_files/firebase-config.js"; // Firebas
 import { getAuth } from "firebase/auth"; // Firebase authentication service object
 import { getDatabase } from "firebase/database";
 
+// Allowing network requests from frontend to backend
+import cors from 'cors';
+
 // Other custom modules
 import { registerUserRoutes } from "./backend/account_registration/account_registration.js"; // For Account registration
 
 // Initialize backend
 const app = express();
 const port = process.env.BACKEND_PORT;
+
+// Configure backend policies
+app.use(express.json());  
+app.use(cors());
+
 
 // Middleware to parse form data (application/x-www-form-urlencoded)
 app.use("/", express.urlencoded({ extended: true }));

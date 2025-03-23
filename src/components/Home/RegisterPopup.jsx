@@ -1,5 +1,40 @@
 import React from "react";
 
+// Email registration 
+const handleEmail = async (event) => {
+  event.preventDefault()
+  console.log("handling email")
+
+  // Form element that invoked the callback funciton
+  const form = new FormData(event.target)
+  const endpoint = 'http://localhost:3002/register'
+
+  // Fetch API to connect to backend endpoint
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      fullName: form.get('fullname'),
+      registerEmail: form.get('register-email'),
+      registerPassword: form.get('register-password'),
+      confirmPassword: form.get('confirm-password')
+    })
+  })
+    .then(response => {
+      // Retrieves the backend server's response as a JSON object.
+      return response.json()
+    })
+    .then(data => {
+      return data
+    })
+    .catch(error => {
+      console.log('An error occurred: ', error)
+    })
+}
+
+
 const RegisterPopup = ({ isOpen, closeModal }) => {
   return (
     <>
@@ -9,7 +44,7 @@ const RegisterPopup = ({ isOpen, closeModal }) => {
             <h2 className="text-3xl font-semibold text-center text-gray-700 mb-6">
               Create an Account
             </h2>
-            <form>
+            <form onSubmit={handleEmail}>
               <div className="mb-4">
                 <label
                   htmlFor="name"
@@ -20,6 +55,7 @@ const RegisterPopup = ({ isOpen, closeModal }) => {
                 <input
                   type="text"
                   id="name"
+                  name="fullname"
                   className="w-full px-4 py-2 mt-2 border rounded-lg focus:outline-none focus:ring-0"
                   placeholder="Enter your full name"
                   required
@@ -36,6 +72,7 @@ const RegisterPopup = ({ isOpen, closeModal }) => {
                 <input
                   type="email"
                   id="register-email"
+                  name="register-email"
                   className="w-full px-4 py-2 mt-2 border rounded-lg focus:outline-none focus:ring-0"
                   placeholder="Enter your email"
                   required
@@ -52,6 +89,7 @@ const RegisterPopup = ({ isOpen, closeModal }) => {
                 <input
                   type="password"
                   id="register-password"
+                  name="register-password"
                   className="w-full px-4 py-2 mt-2 border rounded-lg focus:outline-none focus:ring-0"
                   placeholder="Create a password"
                   required
@@ -68,6 +106,7 @@ const RegisterPopup = ({ isOpen, closeModal }) => {
                 <input
                   type="password"
                   id="confirm-password"
+                  name="confirm-password"
                   className="w-full px-4 py-2 mt-2 border rounded-lg focus:outline-none focus:ring-0"
                   placeholder="Confirm your password"
                   required

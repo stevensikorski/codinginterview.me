@@ -1,15 +1,32 @@
-import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { createUserWithEmailAndPassword, GoogleAuthProvider } from 'firebase/auth'
 
 // Asynchronous function that handles registration with Firebase Authentication ('auth' object)
-const handleRegistration = async (firebase_auth, email, password) => {
+// Email registration
+const handleRegistration = async (firebase_auth, userCredObj) => {
+    const { fullName, registerEmail, registerPassword, confirmPassword } = userCredObj
+
+    // Stores status of processing user registration and returns it
+    var registration_status = {}
+    // Perform basic checks on passwords 
+    if (registerPassword != confirmPassword){
+        registration_status.message = "passwords do not match."
+        registration_status.status = "failed"
+        return registration_status
+    }
+
     try {
         // Await the user creation process
-        const userCred = await createUserWithEmailAndPassword(firebase_auth, email, password);
-        const user = userCred.user;
-        
-        console.log("User signed up: ", user);        
+        await createUserWithEmailAndPassword(firebase_auth, registerEmail, registerPassword);        
+        registration_status.message = "user has registered successfully."
+        registration_status.status = "success" 
+        return registration_status      
     } catch (error) {
+        // Firebase error messages
         console.error("Error signing up:", error.message);
+
+        registration_status.message = "invalid email or password"
+        registration_status.status = "failed"
+        return registration_status
     }
 }
 
@@ -17,17 +34,21 @@ const handleRegistration = async (firebase_auth, email, password) => {
 const registerUserRoutes = (app, firebase_auth) => {
     // Route handler for form submission
     app.post('/register', (req, res) => {
-        const { email, password } = req.body;
+        // const { email, password } = req.body;
+        console.log('printing request body...')
+        console.log(req.body)
 
-        // Process form 
-        handleRegistration(firebase_auth, email, password);
-
-        // Responding back to the user 
-        // res.send(`Form submitted! Email: ${email}`);
-
+        let responseData = {
+            message: 'Email registration is successful',
+            status: 'success'
+        };
+        // Process form and send back response to frontend fetch request
+        responseData = handleRegistration(firebase_auth, req.body)
+        console.log(responseData)
+        res.send(responseData)
         // Redirecting user to another path
         // console.log('redirecting user...')
-        res.redirect('http://localhost:3000/')
+        // res.redirect('http://localhost:3000/')
     })
 };
 
