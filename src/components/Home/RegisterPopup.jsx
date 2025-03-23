@@ -33,6 +33,7 @@ const handleEmail = async (event) => {
     const auth = getAuth(firebase_client)
     // Check for existence of jwt_token passed by backend for authentication
     if (data.jwt_token){
+      console.log("found jwt token: ", data.jwt_token)
       signInWithCustomToken(auth, data.jwt_token)
         .then((userCredential) => {
           // Signed in

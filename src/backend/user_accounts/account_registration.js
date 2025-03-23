@@ -1,5 +1,8 @@
-import { firebase_admin } from '../config_files/firebase-admin-config.js'
-import { getAuth } from 'firebase-admin/auth'
+// Firebase authentication 
+import { auth, rtdb } from '../config_files/firebase-admin-config.js'
+
+// Utility functions
+import { create_jwt_token } from '../utilities.js/firebase_utils/auth_utils.js'
 
 // Asynchronous function that handles registration with Firebase Authentication ('auth' object)
 // Email registration
@@ -16,8 +19,7 @@ const handleRegistration = async (userCredObj) => {
 
     try {
         // Await the user creation process
-        const firebase_auth = getAuth(firebase_admin)
-        const uid = await firebase_auth
+        const uid = await auth
                 .createUser({
                     email: registerEmail,
                     emailVerified: false, 
@@ -29,21 +31,32 @@ const handleRegistration = async (userCredObj) => {
                     return userRecord.uid
                 })
 
-    
-        const jwt_token = await firebase_auth
-                .createCustomToken(uid)
-                .then((customToken) => {
-                    return customToken 
-                })
         registration_status.message = "user has registered successfully."
         registration_status.status = "success" 
-        registration_status.jwt_token = jwt_token   //JWT token for authentication passed to frontend
+        registration_status.jwt_token = await create_jwt_token(uid)  //JWT token for authentication passed to frontend
         registration_status.redirect_url = "/authenticated"
+
+        // Insert user registration information to database
+        const userRef = rtdb.ref("users/" + uid)
+        await userRef.set({
+            signedInWith: "email",
+            authenticationMethods: {
+                email: {
+                    email: registerEmail,
+                    email_verified: false
+                }
+            },
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+            associatedSessionId: 0,
+            solvedProblems: [],
+            attemptedProblems: []
+        })
+        console.log("user data added to rtdb")
         return registration_status      
     } catch (error) {
         // Firebase error messages
         console.error("Error signing up:", error.message);
-
         registration_status.message = "invalid email or password"
         registration_status.status = "failed"
         return registration_status

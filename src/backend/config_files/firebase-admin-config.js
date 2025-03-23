@@ -10,4 +10,6 @@ const firebase_admin = admin.initializeApp({
   databaseURL: "https://codinginterview-me-default-rtdb.firebaseio.com"
 });
 
-export { firebase_admin }
+const auth = getAuth(firebase_admin)
+const rtdb = firebase_admin.database()
+export { auth, rtdb }

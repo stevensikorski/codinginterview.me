@@ -1,3 +1,5 @@
+// Contains general password checking utility functions 
+
 import passwordValidator from 'password-validator'
 
 // UNCOMMENT BELOW when finished testing
