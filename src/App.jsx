@@ -2,7 +2,8 @@ import React, { useState } from "react";
 
 //React router allows routing to different paths (eg: for redirects)
 // import { BrowserRouter as Router, Route, Routes, useNavigate } from "react-router-dom"; // commented out for deployment to work
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, useNavigate } from "react-router-dom";
+import { getToken } from "../src/components/utilities/auth_context.js"
 
 //import compononets
 import FindPartner from "./components/Home/FindPartner";
@@ -17,9 +18,12 @@ import Header from "./components/shared/Header";
 import DevelopmentEnvironmentPage from "./components/Development_Environment/EditorPage";
 import AuthenticatedPage from "./components/AuthenticatedPage/AuthenticatedPage";
 
+// import utility functions and components
+import { ProtectedRoute } from "./components/utilities/ProtectedRoutes.jsx";
+
 function App() {
   //routing capabilities
-  // const navigate = useNavigate(); // commented out for deployment to work
+  const navigate = useNavigate(); // commented out for deployment to work
 
   //login popup show/hide control
   var [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -32,6 +36,11 @@ function App() {
     console.log("User clicked to open login");
     setIsLoginModalOpen(true);
     //navigate("/register");
+
+    //user has a JWT token
+    if (getToken()){
+      navigate("/authenticated")
+    }
   }
 
   //closes login popup when X button is clicked
@@ -76,7 +85,9 @@ export default function Main() {
         <Route path="/" element={<App />} />
         <Route path="/register" element={<Register />} />
         <Route path="/editor" element={<DevelopmentEnvironmentPage />} />
-        <Route path="/authenticated" element={<AuthenticatedPage />} />
+        <Route path="/authenticated" element={
+          <ProtectedRoute element={<AuthenticatedPage />} />
+        } />
       </Routes>
     </Router>
   );

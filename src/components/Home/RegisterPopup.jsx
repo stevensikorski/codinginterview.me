@@ -1,4 +1,6 @@
 import React from "react";
+import { firebase_client } from "../config_files/firebase-client-config.js"
+import { getAuth, signInWithCustomToken } from "firebase/auth"
 
 // Email registration 
 const handleEmail = async (event) => {
@@ -22,16 +24,30 @@ const handleEmail = async (event) => {
       confirmPassword: form.get('confirm-password')
     })
   })
-    .then(response => {
-      // Retrieves the backend server's response as a JSON object.
-      return response.json()
-    })
-    .then(data => {
-      return data
-    })
-    .catch(error => {
-      console.log('An error occurred: ', error)
-    })
+    
+    if (!response.ok){
+      throw new Error ("Error in response")
+    }
+
+    const data = await response.json()
+    const auth = getAuth(firebase_client)
+    // Check for existence of jwt_token passed by backend for authentication
+    if (data.jwt_token){
+      signInWithCustomToken(auth, data.jwt_token)
+        .then((userCredential) => {
+          // Signed in
+          // First, store the JWT token in localStorage so that user authentication state is tracked in multiple paths
+          userCredential.user.getIdToken().then((token) => {
+            localStorage.setItem("jwtToken", token)
+          })
+
+          //redirect to /authenticated
+          window.location.href = data.redirect_url
+        })
+        .catch((error) => {
+          console.log("An error occurred: ", error)
+        })
+    }
 }
 
 

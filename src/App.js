@@ -2,9 +2,9 @@
 import express from "express";
 
 // Firebase settings & SDK
-import { firebase } from "./backend/config_files/firebase-config.js"; // Firebase API object and initialized firebase object
-import { getAuth } from "firebase/auth"; // Firebase authentication service object
-import { getDatabase } from "firebase/database";
+import { firebase_admin } from "./backend/config_files/firebase-admin-config.js"; // Firebase API object and initialized firebase object
+import { getAuth } from "firebase-admin/auth"
+// import { getDatabase } from "firebase/database";
 
 // Allowing network requests from frontend to backend
 import cors from 'cors';
@@ -24,13 +24,13 @@ app.use(cors());
 // Middleware to parse form data (application/x-www-form-urlencoded)
 app.use("/", express.urlencoded({ extended: true }));
 
-// Initialize the firebase services the app uses
-const firebase_auth = getAuth();
-const firebase_db = getDatabase(firebase);
+// Initialize the firebase services
+const firebase_auth = getAuth(firebase_admin);
+// const firebase_db = getDatabase(firebase);
 
 // Initialize the routes for imported js files
 // registration.js
-registerUserRoutes(app, firebase_auth);
+registerUserRoutes(app)
 
 // Start the server
 app.listen(port, () => {
