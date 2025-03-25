@@ -12,6 +12,7 @@ export default {
         "dark-100": "#403D39",
         light: "#FFFCF2",
         primary: "#EB5E28",
+        editor: "#1E1E1E",
       },
     },
   },

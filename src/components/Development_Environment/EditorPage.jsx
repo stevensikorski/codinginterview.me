@@ -9,25 +9,53 @@ import remarkGfm from "remark-gfm";
 export default function DevelopmentEnvironmentPage() {
   const [activeTab, setActiveTab] = useState("editor");
   const [isParticipantsOpen, setIsParticipantsOpen] = useState(false);
+  const [leftWidth, setLeftWidth] = useState(35);
+  const [isResizing, setIsResizing] = useState(false);
 
-  const markdownContent = `# Test
-  ## Test2
-  ### Test4`;
+  const startResizing = () => setIsResizing(true);
+  const stopResizing = () => setIsResizing(false);
+  const handleResizing = (e) => {
+    if (!isResizing) return;
+    const newWidth = (e.clientX / window.innerWidth) * 100;
+    const clampedWidth = Math.max(0, Math.min(newWidth, 100));
+    setLeftWidth(clampedWidth);
+  };
+
+  React.useEffect(() => {
+    if (isResizing) {
+      document.body.style.userSelect = "none";
+    } else {
+      document.body.style.userSelect = "";
+    }
+
+    window.addEventListener("mousemove", handleResizing);
+    window.addEventListener("mouseup", stopResizing);
+    return () => {
+      window.removeEventListener("mousemove", handleResizing);
+      window.removeEventListener("mouseup", stopResizing);
+      document.body.style.userSelect = "";
+    };
+  });
+
+  const markdownContent = `# Header
+  ## Text
+  ### Text
+  Text`;
 
   return (
-    <main className="flex flex-row h-screen w-screen bg-neutral-900">
+    <main className="flex flex-row h-screen w-screen bg-neutral-900 overflow-hidden whitespace-nowrap">
       {/* Sidebar */}
-      <div className="w-16 text-neutral-300 p-4 gap-4 flex flex-col">
+      <nav className="w-16 text-neutral-300 p-4 gap-4 flex flex-col shrink-0">
         <p className="text-center">Nav</p>
         <p className="text-center">Bar</p>
-      </div>
+      </nav>
 
       {/* Left Section */}
-      <section className="flex flex-col w-[35%] my-2 gap-2">
+      <section className="flex flex-col my-2 gap-2 shrink-0 min-w-[400px] max-w-[65%]" style={{ width: `${leftWidth}%` }}>
         {/* Problem */}
-        <div className="flex flex-col flex-grow rounded-xl border bg-[#1E1E1E] border-neutral-800 overflow-hidden">
-          <div className="flex flex-row px-2 gap-2 border-b bg-neutral-900 border-neutral-800">
-            <p className="p-1 font-semibold text-neutral-500">Problem</p>
+        <div className="flex flex-col flex-grow rounded-lg border shadow bg-editor border-neutral-800 shadow-neutral-950/75 overflow-hidden">
+          <div className="flex flex-row px-1 gap-1 border-b bg-neutral-900 border-neutral-800">
+            <p className="p-1 font-semibold text-neutral-600">Problem</p>
           </div>
 
           <div className="px-4 text-neutral-300 markdown">
@@ -36,29 +64,32 @@ export default function DevelopmentEnvironmentPage() {
         </div>
 
         {/* Participants */}
-        <div className="rounded-xl border bg-[#1E1E1E] border-neutral-800 overflow-hidden">
-          <div className="flex flex-row justify-between items-center px-2 gap-2 bg-neutral-900">
-            <p className="p-1 font-semibold text-neutral-500">Participants</p>
-            <div className="flex items-center gap-2">
-              <button className="p-1 transition duration-200" disabled>
-                <MicOff className={`size-6 p-0.5 text-neutral-800 transition duration-200 `} />
+        <div className="rounded-lg border shadow bg-editor border-neutral-800 shadow-neutral-950/75 overflow-hidden">
+          <div className="flex flex-row justify-between items-center bg-neutral-900">
+            <p className="p-1 px-2 font-semibold text-neutral-600">Problem</p>
+
+            {/* Participants Button */}
+            <div className="flex items-center px-1 gap-1">
+              <button className="my-1 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200" disabled>
+                <MicOff className="p-1 text-neutral-600" />
               </button>
-              <button className="p-1 transition duration-200" disabled>
-                <VideoOff className={`size-6 p-0.5 text-neutral-800 transition duration-200 `} />
+              <button className="my-1 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200" disabled>
+                <VideoOff className="p-1 text-neutral-600" />
               </button>
-              <button className="p-1" onClick={() => setIsParticipantsOpen(!isParticipantsOpen)}>
-                <ChevronDown className={`size-6 p-0.5 text-neutral-500 transition-transform duration-200 ${isParticipantsOpen ? "rotate-0" : "rotate-180 text-neutral-800"}`} />
+              <button className="my-1 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200" onClick={() => setIsParticipantsOpen(!isParticipantsOpen)}>
+                <ChevronDown className={`p-1 text-neutral-600 ${isParticipantsOpen ? "rotate-0" : "rotate-180"}`} />
               </button>
             </div>
           </div>
 
+          {/* Participants Camera */}
           {isParticipantsOpen && (
-            <div className="grid grid-cols-1 md:grid-cols-2 text-neutral-300 border-t border-neutral-800">
+            <div className="grid grid-cols-1 md:grid-cols-2 text-neutral-600 border-t border-neutral-800">
               <div className="relative aspect-video bg-neutral-950 flex items-center justify-center">
-                <span className="text-lg font-semibold">Steven</span>
+                <span className="text-lg font-semibold select-none">Steven</span>
               </div>
               <div className="relative aspect-video bg-neutral-950 flex items-center justify-center">
-                <span className="text-lg font-semibold">Narinder</span>
+                <span className="text-lg font-semibold select-none">Narinder</span>
               </div>
             </div>
           )}
@@ -66,20 +97,20 @@ export default function DevelopmentEnvironmentPage() {
       </section>
 
       {/* Resizing */}
-      <div className="w-[10px] flex justify-center items-center my-5 cursor-col-resize">
-        <div className="w-[1px] h-[5%] bg-neutral-800"></div>
+      <div className="w-2 flex justify-center items-center cursor-col-resize my-2 shrink-0" onMouseDown={startResizing}>
+        <div className="w-0.5 h-[5%] rounded bg-neutral-800" />
       </div>
 
       {/* Right Section */}
-      <section className="flex flex-col flex-grow my-2 mr-2 rounded-xl border bg-[#1E1E1E] border-neutral-800 overflow-hidden">
-        <div className="flex flex-row px-2 gap-2 items-center border-b bg-neutral-900 border-neutral-800">
-          <button className={`p-1 font-semibold hover:text-neutral-500 transition duration-200 ${activeTab === "editor" ? "text-neutral-500" : "text-neutral-800"}`} onClick={() => setActiveTab("editor")}>
+      <section className="flex flex-col flex-grow my-2 mr-2 rounded-lg border shadow bg-editor border-neutral-800 shadow-neutral-950/75 min-w-[500px] overflow-hidden">
+        <div className="flex flex-row px-1 gap-1 items-center border-b bg-neutral-900 border-neutral-800">
+          <button className="my-1 px-1 font-semibold text-neutral-600 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200" onClick={() => setActiveTab("editor")}>
             Editor
           </button>
-          <button className={`p-1 font-semibold hover:text-neutral-500 transition duration-200 ${activeTab === "notepad" ? "text-neutral-500" : "text-neutral-800"}`} onClick={() => setActiveTab("notepad")}>
+          <button className="my-1 px-1 font-semibold text-neutral-600 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200" onClick={() => setActiveTab("notepad")}>
             Notepad
           </button>
-          <button className={`p-1 font-semibold hover:text-neutral-500 transition duration-200 ${activeTab === "terminal" ? "text-neutral-500" : "text-neutral-800"}`} onClick={() => setActiveTab("terminal")}>
+          <button className="my-1 px-1 font-semibold text-neutral-600 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200" onClick={() => setActiveTab("terminal")}>
             Terminal
           </button>
         </div>
