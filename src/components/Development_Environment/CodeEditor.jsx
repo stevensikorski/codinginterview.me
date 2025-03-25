@@ -90,7 +90,7 @@ export default function CodeEditor() {
             <div className="absolute flex flex-col left-0 top-full bg-editor border border-neutral-800 rounded-lg shadow-neutral-950/75 z-20 p-1 space-y-1">
               {Object.entries(languageNames).map(([lang, name]) => (
                 <button key={lang} onClick={() => handleLanguageChange(lang)} className="w-full flex items-center gap-x-1 px-1 py-1 text-sm font-semibold text-neutral-600 rounded-md hover:bg-neutral-600/50 transition duration-200">
-                  {lang === language ? <Check className="size-4 text-neutral-600 shrink-0" /> : <span className="size-4" />}
+                  {lang === language ? <Check className="size-5 p-0.5 text-neutral-600 shrink-0" /> : <span className="size-5 p-0.5" />}
                   {name}
                 </button>
               ))}
