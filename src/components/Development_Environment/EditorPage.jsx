@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import CodeEditor from "./CodeEditor";
 import NoteEditor from "./NoteEditor";
 import TerminalRuntime from "./TerminalRuntime";
-import { MicOff, VideoOff, ChevronDown } from "lucide-react";
+import ParticipantsPanel from "./ParticipantsPanel";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -59,41 +59,12 @@ export default function DevelopmentEnvironmentPage() {
           </div>
 
           <div className="px-4 text-neutral-300 markdown">
-            <ReactMarkdown remarkPlugins={remarkGfm}>{markdownContent}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdownContent}</ReactMarkdown>
           </div>
         </div>
 
         {/* Participants */}
-        <div className="rounded-lg border shadow bg-editor border-neutral-800 shadow-neutral-950/75 overflow-hidden">
-          <div className="flex flex-row justify-between items-center bg-neutral-900">
-            <p className="p-1 px-2 font-semibold text-neutral-600">Problem</p>
-
-            {/* Participants Button */}
-            <div className="flex items-center px-1 gap-1">
-              <button className="my-1 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200" disabled>
-                <MicOff className="p-1 text-neutral-600" />
-              </button>
-              <button className="my-1 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200" disabled>
-                <VideoOff className="p-1 text-neutral-600" />
-              </button>
-              <button className="my-1 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200" onClick={() => setIsParticipantsOpen(!isParticipantsOpen)}>
-                <ChevronDown className={`p-1 text-neutral-600 ${isParticipantsOpen ? "rotate-0" : "rotate-180"}`} />
-              </button>
-            </div>
-          </div>
-
-          {/* Participants Camera */}
-          {isParticipantsOpen && (
-            <div className="grid grid-cols-1 md:grid-cols-2 text-neutral-600 border-t border-neutral-800">
-              <div className="relative aspect-video bg-neutral-950 flex items-center justify-center">
-                <span className="text-lg font-semibold select-none">Steven</span>
-              </div>
-              <div className="relative aspect-video bg-neutral-950 flex items-center justify-center">
-                <span className="text-lg font-semibold select-none">Narinder</span>
-              </div>
-            </div>
-          )}
-        </div>
+        <ParticipantsPanel isOpen={isParticipantsOpen} toggleOpen={() => setIsParticipantsOpen((prev) => !prev)} />
       </section>
 
       {/* Resizing */}
@@ -117,7 +88,7 @@ export default function DevelopmentEnvironmentPage() {
 
         <div className="flex flex-col flex-grow">
           <div className={activeTab === "editor" ? "flex-grow flex" : "hidden"}>
-            <CodeEditor />
+            <CodeEditor setActiveTab={setActiveTab} />
           </div>
           <div className={activeTab === "notepad" ? "flex-grow flex" : "hidden"}>
             <NoteEditor />

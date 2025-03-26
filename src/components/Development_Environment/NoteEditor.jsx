@@ -5,8 +5,9 @@ export default function MarkdownEditor() {
   const editorRef = useRef(null);
 
   const [position, setPosition] = useState({ line: 1, column: 1 });
-  const [fontSize, setFontSize] = useState(14);
+  const [charCount, setCharCount] = useState(0);
 
+  const [fontSize, setFontSize] = useState(14);
   const fontSizes = [10, 12, 14, 16, 18, 20];
 
   const rotateFontSize = () => {
@@ -18,9 +19,22 @@ export default function MarkdownEditor() {
 
   const handleEditorMount = (editor) => {
     editorRef.current = editor;
-    editor.onDidChangeCursorPosition((event) => {
-      setPosition({ line: event.position.lineNumber, column: event.position.column });
+
+    const model = editor.getModel();
+    setCharCount(model.getValueLength());
+
+    editor.onDidChangeModelContent(() => {
+      const updatedModel = editor.getModel();
+      setCharCount(updatedModel.getValueLength());
     });
+
+    editor.onDidChangeCursorPosition((event) => {
+      setPosition({
+        line: event.position.lineNumber,
+        column: event.position.column,
+      });
+    });
+
     editor.updateOptions({ fontSize });
   };
 
@@ -74,9 +88,14 @@ export default function MarkdownEditor() {
 
       {/* Footer */}
       <div className="flex flex-row justify-between border-t text-neutral-600 border-neutral-800">
-        <p className="p-1 px-2 text-sm font-semibold">
-          Ln {position.line}, Col {position.column}
-        </p>
+        <div className="flex items-center px-1 gap-1">
+          <p className="p-1 text-sm font-semibold">
+            Ln {position.line}, Col {position.column}
+          </p>
+          <span className="w-[1px] h-[50%] mx-1 bg-neutral-800"></span>
+          <p className="p-1 text-sm font-semibold">{charCount} characters</p>
+        </div>
+
         <div className="flex flex-wrap px-1 gap-1">
           <button onClick={rotateFontSize} className="my-1 px-1 font-semibold text-neutral-600 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200 text-sm">
             Font {fontSize}
