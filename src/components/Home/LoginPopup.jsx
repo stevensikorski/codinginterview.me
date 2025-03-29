@@ -1,4 +1,24 @@
 import React from "react";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth"
+
+// Handles login for email-password sign-in method on client side
+const handleLogin = async (event) => {
+    event.preventDefault()
+    const form = new FormData(event.target)
+    const auth = getAuth()
+    console.log(form.get('email'), form.get('password'))
+    await signInWithEmailAndPassword(auth, form.get('email'), form.get('password'))
+      .then(async (userCredentials) => {
+        // Signed in
+        const user = userCredentials.user 
+        const jwt_token = await user.getIdToken(true)
+        localStorage.setItem("jwtToken", jwt_token)
+        window.location.href = "/authenticated"
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+}
 
 const LoginModal = ({ isOpen, closeModal }) => {
   return (
@@ -9,7 +29,7 @@ const LoginModal = ({ isOpen, closeModal }) => {
             <h2 className="text-3xl font-semibold text-center text-gray-700 mb-6">
               Login
             </h2>
-            <form>
+            <form onSubmit={handleLogin}>
               <div className="mb-4">
                 <label
                   htmlFor="email"
@@ -20,6 +40,7 @@ const LoginModal = ({ isOpen, closeModal }) => {
                 <input
                   type="email"
                   id="email"
+                  name="email"
                   className="w-full px-4 py-2 mt-2 border rounded-lg focus:outline-none focus:ring-0"
                   placeholder="Enter your email"
                   required
@@ -36,6 +57,7 @@ const LoginModal = ({ isOpen, closeModal }) => {
                 <input
                   type="password"
                   id="password"
+                  name="password"
                   className="w-full px-4 py-2 mt-2 border rounded-lg focus:outline-none focus:ring-0"
                   placeholder="Enter your password"
                   required

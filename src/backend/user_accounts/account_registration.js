@@ -47,10 +47,7 @@ const handleRegistration = async (userCredObj) => {
                 }
             },
             createdAt: Date.now(),
-            updatedAt: Date.now(),
-            associatedSessionId: 0,
-            solvedProblems: [],
-            attemptedProblems: []
+            updatedAt: Date.now()
         })
         console.log("user data added to rtdb")
         return registration_status      
