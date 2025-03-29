@@ -17,6 +17,7 @@ import Footer from "./components/shared/Footer";
 import Header from "./components/shared/Header";
 import DevelopmentEnvironmentPage from "./components/Development_Environment/EditorPage";
 import AuthenticatedPage from "./components/AuthenticatedPage/AuthenticatedPage";
+import Session from "./components/Session/Session.jsx";
 
 // import utility functions and components
 import { ProtectedRoute } from "./components/utilities/ProtectedRoutes.jsx";
@@ -85,6 +86,9 @@ export default function Main() {
         <Route path="/" element={<App />} />
         <Route path="/register" element={<Register />} />
         <Route path="/editor" element={<DevelopmentEnvironmentPage />} />
+        <Route path="/session" element={<Session />} />
+        {/* The Route component does not allow chained redirects, so if nested component 
+        redirects once, there won't be a further redirect to the 'path' specified in Router */}
         <Route path="/authenticated" element={
           <ProtectedRoute element={<AuthenticatedPage />} />
         } />

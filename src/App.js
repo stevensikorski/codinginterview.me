@@ -6,6 +6,7 @@ import cors from 'cors';
 
 // Other custom modules
 import { registerUserRoutes } from "./backend/user_accounts/account_registration.js"; // For Account registration
+// import { registerSessionRoutes } from "./backend/user_sessions/session.js"; // For real-time video sessions
 
 // Initialize backend
 const app = express();
@@ -20,8 +21,11 @@ app.use(cors());
 app.use("/", express.urlencoded({ extended: true }));
 
 // Initialize the routes for imported js files
-// registration.js
+// registration.js, for user account registration
 registerUserRoutes(app)
+
+// session.js, for real-time video chats
+// registerSessionRoutes(app)
 
 // Start the server
 app.listen(port, () => {
