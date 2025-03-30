@@ -51,15 +51,31 @@ const deleteAllUsers = async () => {
 // deleteAllUsers()
 
 // JWT token creation given a user id (uid)
-const create_jwt_token = async (uid) => {
-    const jwt_token = await auth
-        .createCustomToken(uid)
-        .then((customToken) => {
-            return customToken 
-        })
-    return jwt_token
+const createJWTToken = async (uid) => {
+    try {
+        const jwtToken = await auth
+            .createCustomToken(uid)
+            .then((customToken) => {
+                return customToken 
+            })
+        return jwtToken
+    } catch (error){
+        console.log(error)
+    }
+}
+
+// Compare user's JWT token in localStorage to the one assigned by firebase
+const verifyJWTToken = async (jwtToken) => {
+    try {
+        const decodedToken = await auth.verifyIdToken(jwtToken)
+        console.log(decodedToken)
+    } catch (error){
+        console.log(error)
+    }
 }
 
 
 
-export { listAllUsers, deleteAllUsers, create_jwt_token }
+
+
+export { listAllUsers, deleteAllUsers, createJWTToken, verifyJWTToken }

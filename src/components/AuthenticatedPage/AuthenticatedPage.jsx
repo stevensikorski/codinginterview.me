@@ -1,18 +1,45 @@
 // src/components/AuthenticatedPage/AuthenticatedPage.jsx
 import React from "react";
+
 // import { useNavigate } from 'react-router-dom'; // commented out for deployment to work
 import Header from "../shared/Header";
 import Footer from "../shared/Footer";
 
+import { getUser, isAuthenticated } from "../utilities/auth_context";
+
+const startAsInterviewer = async () => {
+  //navigate to problem selection
+  try {
+    const user = await getUser()
+    const endpoint = "http://localhost:3002/createsession"
+
+    //send request to make a room in backend
+    if (user){
+      const jwtToken = await user.getIdToken();
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          uid: user.uid,
+          jwtToken: jwtToken
+        })
+      })
+
+      // handle response
+      // placeholder here
+    }
+  } catch (error) {
+    console.log(error)
+  }
+};
+
+const startAsInterviewee = () => {
+  //navigate to waiting room
+};
+
 export default function AuthenticatedPage() {
-  const startAsInterviewer = () => {
-    //navigate to problem selection
-  };
-
-  const startAsInterviewee = () => {
-    //navigate to waiting room
-  };
-
   return (
     <div className="min-h-screen flex flex-col min-w-[1024px]">
       <Header />

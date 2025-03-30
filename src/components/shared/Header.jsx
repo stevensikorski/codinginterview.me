@@ -1,31 +1,33 @@
 import React, { useEffect, useState } from "react";
-import { getToken } from "../utilities/auth_context.js";
+import { isAuthenticated as isUserAuthenticated} from "../utilities/auth_context.js";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { firebase_client } from "../config_files/firebase-client-config.js";
 
 export default function Header({ openModal }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
-    //check for token first (faster than waiting for Firebase)
-    const token = getToken();
-    if (token) {
-      setIsAuthenticated(true);
-    }
-
-    //also check Firebase auth state for email
-    const auth = getAuth(firebase_client);
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
+    const checkAuthState = async () => {
+      //check for token first (faster than waiting for Firebase)
+      const getUserAuthState = await isUserAuthenticated()
+      console.log(getUserAuthState)
+      if (getUserAuthState) {
         setIsAuthenticated(true);
-        if (user.email) {
-          setUserEmail(user.email);
-        }
       }
-    });
-    
-    return () => unsubscribe(); // Cleanup listener on unmount
+
+      //also check Firebase auth state for email
+      const auth = getAuth();
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+          setIsAuthenticated(true);
+          if (user.email) {
+            setUserEmail(user.email);
+          }
+        }
+      });
+      unsubscribe(); // Cleanup listener on unmount
+    }
+    checkAuthState()
   }, []);
 
   const handleLogout = () => {
@@ -33,16 +35,17 @@ export default function Header({ openModal }) {
     localStorage.removeItem("jwtToken");
     
     //sign out from Firebase
-    const auth = getAuth(firebase_client);
+    const auth = getAuth();
     auth.signOut();
     
     setIsAuthenticated(false);
     setUserEmail("");
-    
+
     //redirect to home page
     window.location.href = "/";
   };
 
+  console.log(isAuthenticated)
   //logo destination changes based on authentication state
   const homeLink = isAuthenticated ? "/authenticated" : "/";
 

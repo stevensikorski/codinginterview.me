@@ -6,7 +6,7 @@ import cors from 'cors';
 
 // Other custom modules
 import { registerUserRoutes } from "./backend/user_accounts/account_registration.js"; // For Account registration
-// import { registerSessionRoutes } from "./backend/user_sessions/session.js"; // For real-time video sessions
+import { registerSessionRoutes } from "./backend/user_sessions/session.js"; // For room creation
 
 // Initialize backend
 const app = express();
@@ -25,7 +25,7 @@ app.use("/", express.urlencoded({ extended: true }));
 registerUserRoutes(app)
 
 // session.js, for real-time video chats
-// registerSessionRoutes(app)
+registerSessionRoutes(app)
 
 // Start the server
 app.listen(port, () => {

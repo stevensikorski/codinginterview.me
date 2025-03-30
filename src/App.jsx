@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 //React router allows routing to different paths (eg: for redirects)
 // import { BrowserRouter as Router, Route, Routes, useNavigate } from "react-router-dom"; // commented out for deployment to work
 import { BrowserRouter as Router, Route, Routes, useNavigate } from "react-router-dom";
-import { getToken } from "../src/components/utilities/auth_context.js"
+import { isAuthenticated } from "../src/components/utilities/auth_context.js"
 
 //import compononets
 import FindPartner from "./components/Home/FindPartner";
@@ -32,18 +32,27 @@ function App() {
   //register popup show/hide control
   var [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
 
+  console.log(isLoginModalOpen)
+  useEffect(() => {
+    if (isLoginModalOpen === true){
+      const authState = async () => {
+        const status = await isAuthenticated()
+        if (status) navigate("/authenticated");
+      }
+      authState()
+    }}, [isLoginModalOpen])
+
   //opens login popup when "sign in" button is clicked
   function handleOpenLoginButtonClick() {
     console.log("User clicked to open login");
-    if (getToken()) {
-      navigate("/authenticated");
-    } else {
-      setIsLoginModalOpen(true);
-    }
+    // Set to current state to force authentication check in useEffect
+    setIsLoginModalOpen(true)
   }
+  
 
   //closes login popup when X button is clicked
   function handleCloseLoginModal() {
+    console.log("User closed login")
     setIsLoginModalOpen(false);
   }
 
@@ -60,7 +69,7 @@ function App() {
 
   return (
     <div className="min-w-[1024px]">
-      <Header openModal={handleOpenLoginButtonClick} /> {/*nav bar*/}
+      <Header openModal={handleOpenLoginButtonClick} /> 
       <main>
         {/*sections of home*/}
         <Hero openRegisterModal={handleOpenRegisterButtonClick} />

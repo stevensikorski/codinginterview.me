@@ -2,7 +2,7 @@
 import { auth, rtdb } from '../config_files/firebase-admin-config.js'
 
 // Utility functions
-import { create_jwt_token } from '../utilities.js/firebase_utils/auth_utils.js'
+import { createJWTToken } from '../utils/firebase_utils/auth_utils.js'
 
 // Asynchronous function that handles registration with Firebase Authentication ('auth' object)
 // Email registration
@@ -33,12 +33,13 @@ const handleRegistration = async (userCredObj) => {
 
         registration_status.message = "user has registered successfully."
         registration_status.status = "success" 
-        registration_status.jwt_token = await create_jwt_token(uid)  //JWT token for authentication passed to frontend
+        registration_status.jwt_token = await createJWTToken(uid)  //JWT token for authentication passed to frontend
         registration_status.redirect_url = "/authenticated"
 
         // Insert user registration information to database
         const userRef = rtdb.ref("users/" + uid)
         await userRef.set({
+            userID: uid,
             signedInWith: "email",
             authenticationMethods: {
                 email: {
@@ -64,16 +65,9 @@ const handleRegistration = async (userCredObj) => {
 const registerUserRoutes = (app) => {
     // Route handler for form submission
     app.post('/register', async (req, res) => {
-        // const { email, password } = req.body;
-        console.log('printing request body...')
-        console.log(req.body)
-
         // Process form and send back response to frontend fetch request
         let responseData = await handleRegistration(req.body)
-        console.log(responseData)
         res.json(responseData)
-        // Redirecting user to another path
-        // console.log('redirecting user...')
     })
 };
 
