@@ -2,8 +2,11 @@ import React, { useState, useRef } from "react";
 import Editor from "@monaco-editor/react";
 import { ChevronDown, Check, Pencil, PencilOff, Play, Save, ListRestart } from "lucide-react";
 import StarterCode from "./StarterCode";
+import { runCodeWithJudge0 } from "../utilities/judge0";
 
-export default function CodeEditor({ setActiveTab }) {
+const languages = [{ key: "python", name: "Python", id: 71 }];
+
+export default function CodeEditor({ setActiveTab, setCodeOutput }) {
   const editorRef = useRef(null);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -55,7 +58,10 @@ export default function CodeEditor({ setActiveTab }) {
   const handleEditorMount = (editor) => {
     editorRef.current = editor;
     editor.onDidChangeCursorPosition((event) => {
-      setPosition({ line: event.position.lineNumber, column: event.position.column });
+      setPosition({
+        line: event.position.lineNumber,
+        column: event.position.column,
+      });
     });
     editor.getModel()?.updateOptions({ tabSize });
   };
@@ -71,10 +77,26 @@ export default function CodeEditor({ setActiveTab }) {
     }
   };
 
-  const languageNames = {
-    python: "Python",
-    cpp: "C++",
-    javascript: "JavaScript",
+  const handleRunCode = async () => {
+    setActiveTab("terminal");
+    try {
+      console.log("Code being sent:", code);
+      const languageData = languages.find((lang) => lang.key === language);
+
+      const result = await runCodeWithJudge0({
+        source_code: code,
+        language_id: languageData?.id,
+        stdin: "",
+      });
+
+      console.log("Judge0 result:", result);
+
+      const finalOutput = [result?.stdout, result?.stderr, result?.compile_output, result?.message, `[${result?.status?.description || "Unknown Status"}]`].filter(Boolean).join("\n\n") || "No output.";
+
+      setCodeOutput(finalOutput);
+    } catch (err) {
+      setCodeOutput("❌ Error: " + err.message);
+    }
   };
 
   return (
@@ -83,24 +105,24 @@ export default function CodeEditor({ setActiveTab }) {
       <div className="flex w-full flex-wrap justify-between items-center border-b border-neutral-800 relative z-10">
         <div className="group relative px-1">
           <button className="my-1 pl-1 font-semibold text-neutral-600 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200 text-sm flex items-center">
-            {languageNames[language]}
+            {languages.find((lang) => lang.key === language)?.name}
             <ChevronDown className="size-5 p-0.5 text-neutral-600 transition-transform duration-200 group-hover:rotate-180" />
           </button>
 
           <div className="hidden group-hover:flex flex-col absolute left-0 top-full bg-editor border shadow border-neutral-800 rounded-lg shadow-neutral-950/75 z-20 p-1 space-y-1">
-            {Object.entries(languageNames).map(([lang, name]) => (
+            {languages.map(({ key, name }) => (
               <button
-                key={lang}
+                key={key}
                 onClick={() => {
-                  setLanguage(lang);
-                  setCode(StarterCode[lang]);
+                  setLanguage(key);
+                  setCode(StarterCode[key]);
                   setTabSize(4);
                   setTimeout(() => {
                     editorRef.current?.getModel()?.updateOptions({ tabSize });
                   }, 0);
                 }}
                 className="w-full flex items-center gap-x-1 px-1 py-1 text-sm font-semibold text-neutral-600 rounded-md hover:bg-neutral-600/50 transition duration-200">
-                {lang === language ? <Check className="size-5 p-0.5 text-neutral-600 shrink-0" /> : <span className="size-5 p-0.5" />}
+                {key === language ? <Check className="size-5 p-0.5 text-neutral-600 shrink-0" /> : <span className="size-5 p-0.5" />}
                 {name}
               </button>
             ))}
@@ -114,7 +136,7 @@ export default function CodeEditor({ setActiveTab }) {
           <button className="p-0.5 aspect-square text-neutral-600 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200 flex items-center justify-center">
             <Save className="size-4" />
           </button>
-          <button onClick={() => setActiveTab("terminal")} className="p-0.5 aspect-square text-neutral-600 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200 flex items-center justify-center">
+          <button onClick={handleRunCode} className="p-0.5 aspect-square text-neutral-600 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200 flex items-center justify-center">
             <Play className="size-4" />
           </button>
         </div>
@@ -130,6 +152,7 @@ export default function CodeEditor({ setActiveTab }) {
           loading=""
           onMount={handleEditorMount}
           onChange={(value) => {
+            console.log("Code changed:", value);
             setCode(value || "");
             if (isOpen) setIsOpen(false);
           }}
@@ -152,7 +175,7 @@ export default function CodeEditor({ setActiveTab }) {
 
       {/* Footer */}
       <div className="flex w-full flex-wrap justify-between items-center border-t border-neutral-800 text-neutral-600 px-1">
-        <p className="text-sm font-semibold py-1 px-2">
+        <p className="p-1 text-sm font-semibold">
           Ln {position.line}, Col {position.column}
         </p>
 

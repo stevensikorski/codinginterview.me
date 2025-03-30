@@ -11,6 +11,7 @@ export default function DevelopmentEnvironmentPage() {
   const [isParticipantsOpen, setIsParticipantsOpen] = useState(false);
   const [leftWidth, setLeftWidth] = useState(35);
   const [isResizing, setIsResizing] = useState(false);
+  const [codeOutput, setCodeOutput] = useState("");
 
   const startResizing = () => setIsResizing(true);
   const stopResizing = () => setIsResizing(false);
@@ -37,6 +38,7 @@ export default function DevelopmentEnvironmentPage() {
     };
   });
 
+  // temporary placeholder for the problem section
   const markdownContent = `# Header
   ## Text
   ### Text
@@ -88,13 +90,13 @@ export default function DevelopmentEnvironmentPage() {
 
         <div className="flex flex-col flex-grow">
           <div className={activeTab === "editor" ? "flex-grow flex" : "hidden"}>
-            <CodeEditor setActiveTab={setActiveTab} />
+            <CodeEditor setActiveTab={setActiveTab} setCodeOutput={setCodeOutput} />
           </div>
           <div className={activeTab === "notepad" ? "flex-grow flex" : "hidden"}>
             <NoteEditor />
           </div>
           <div className={activeTab === "terminal" ? "flex-grow flex" : "hidden"}>
-            <TerminalRuntime />
+            <TerminalRuntime output={codeOutput} />
           </div>
         </div>
       </section>
