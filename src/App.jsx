@@ -35,12 +35,10 @@ function App() {
   //opens login popup when "sign in" button is clicked
   function handleOpenLoginButtonClick() {
     console.log("User clicked to open login");
-    setIsLoginModalOpen(true);
-    //navigate("/register");
-
-    //user has a JWT token
-    if (getToken()){
-      navigate("/authenticated")
+    if (getToken()) {
+      navigate("/authenticated");
+    } else {
+      setIsLoginModalOpen(true);
     }
   }
 

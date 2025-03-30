@@ -1,48 +1,98 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { getToken } from "../utilities/auth_context.js";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { firebase_client } from "../config_files/firebase-client-config.js";
 
 export default function Header({ openModal }) {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+
+  useEffect(() => {
+    //check for token first (faster than waiting for Firebase)
+    const token = getToken();
+    if (token) {
+      setIsAuthenticated(true);
+    }
+
+    //also check Firebase auth state for email
+    const auth = getAuth(firebase_client);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsAuthenticated(true);
+        if (user.email) {
+          setUserEmail(user.email);
+        }
+      }
+    });
+    
+    return () => unsubscribe(); // Cleanup listener on unmount
+  }, []);
+
+  const handleLogout = () => {
+    //clear the token from localStorage
+    localStorage.removeItem("jwtToken");
+    
+    //sign out from Firebase
+    const auth = getAuth(firebase_client);
+    auth.signOut();
+    
+    setIsAuthenticated(false);
+    setUserEmail("");
+    
+    //redirect to home page
+    window.location.href = "/";
+  };
+
+  //logo destination changes based on authentication state
+  const homeLink = isAuthenticated ? "/authenticated" : "/";
+
   return (
     <header className="bg-light py-3 px-4">
       <div className="container mx-auto">
         <div className="max-w-[1300px] mx-auto">
           <div className="flex justify-between items-center">
-            {/*logo*/}
-            <a href="/" className="text-2xl font-semibold text-dark">
-              <figure>
-                <img
-                  className="size-28 object-contain"
-                  src="/logo.webp"
-                  alt="logo.webp"
-                />
-              </figure>
+            {/*logo - links to dashboard if authenticated, home if not */}
+            <a href={homeLink} className="text-2xl font-semibold text-dark">
+              <img className="size-28 object-contain" src="/logo.webp" alt="logo" />
             </a>
             
-            {/*desktop navigation*/}
-            <nav>
-              <div className="flex flex-row gap-14">
-                <ul className="flex flex-row gap-10 items-center">
-                  {/*home link*/}
-                  <li className="group/link active relative">
-                    <a
-                      href="/"
-                      className="text-[13px] text-dark-100 leading-tight hover:font-bold group-[.active]/link:font-bold transition-all"
-                    >
-                      HOME
-                    </a>
-                  </li>
-                  {/*sign in button - opens login popup*/}
-                  <li>
+            {/*navigation */}
+            <div className="flex items-center gap-6">
+              {/*only show HOME button when not authenticated */}
+              {!isAuthenticated && (
+                <a
+                  href={homeLink}
+                  className="text-[13px] text-dark-100 leading-tight font-bold transition-all"
+                >
+                  HOME
+                </a>
+              )}
+              
+              {isAuthenticated ? (
+                <>
+                  <div className="flex items-center gap-8">
+                    {userEmail && (
+                      <span className="text-[15px] text-dark-100 font-medium">
+                        {userEmail}
+                      </span>
+                    )}
                     <button
-                      type="button"
-                      onClick={openModal}
-                      className="px-10 py-3 rounded-md bg-primary text-[15px] leading-tight font-bold text-light inline-block"
+                      onClick={handleLogout}
+                      className="px-6 py-2 rounded-md bg-neutral-700 text-[15px] font-bold text-light"
                     >
-                      Sign in
+                      Logout
                     </button>
-                  </li>
-                </ul>
-              </div>
-            </nav>
+                  </div>
+                </>
+              ) : (
+                <button
+                  onClick={openModal}
+                  className="px-6 py-2 rounded-md bg-primary text-[15px] font-bold text-light"
+                >
+                  Sign in
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
