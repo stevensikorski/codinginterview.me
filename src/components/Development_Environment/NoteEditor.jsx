@@ -40,23 +40,6 @@ export default function MarkdownEditor() {
 
   return (
     <div className="flex flex-grow flex-col rounded-b-lg overflow-hidden">
-      {/* Header */}
-      <div className="flex w-full flex-wrap justify-between items-center border-b border-neutral-800 overflow-hidden">
-        {/* Left Buttons */}
-        <div className="flex flex-wrap px-1 gap-1 max-w-full">
-          <button className="my-1 px-1 font-semibold text-neutral-600 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200 text-sm">Option 1</button>
-          <button className="my-1 px-1 font-semibold text-neutral-600 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200 text-sm">Option 2</button>
-          <button className="my-1 px-1 font-semibold text-neutral-600 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200 text-sm">Option 3</button>
-        </div>
-
-        {/* Right Buttons */}
-        <div className="flex flex-wrap px-1 gap-1 justify-end max-w-full">
-          <button className="my-1 px-1 font-semibold text-neutral-600 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200 text-sm">Option 1</button>
-          <button className="my-1 px-1 font-semibold text-neutral-600 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200 text-sm">Option 2</button>
-          <button className="my-1 px-1 font-semibold text-neutral-600 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200 text-sm">Option 3</button>
-        </div>
-      </div>
-
       {/* Editor */}
       <div className="flex flex-col flex-grow">
         <Editor
@@ -74,7 +57,7 @@ export default function MarkdownEditor() {
             scrollBeyondLastLine: false,
             wordWrap: "off",
             fontSize: fontSize,
-            lineNumbers: "on",
+            lineNumbers: "off",
             renderLineHighlight: "none",
             overviewRulerBorder: false,
             folding: false,

@@ -20,7 +20,7 @@
   }
 
   .markdown p {
-    @apply text-neutral-400 mb-3;
+    @apply text-neutral-400;
   }
 
   .markdown ul {
@@ -58,4 +58,13 @@
   .markdown hr {
     @apply border-neutral-700 my-4;
   }
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
