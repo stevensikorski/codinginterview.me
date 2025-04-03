@@ -61,7 +61,7 @@ export default function DevelopmentEnvironmentPage() {
       {/* Workspace Container */}
       <div className="relative flex flex-row flex-1 overflow-hidden">
         {/* Left Section */}
-        <section className="flex flex-col my-2 gap-2 shrink-0 min-w-[400px] max-w-[65%]" style={{ width: `${leftWidth}%` }}>
+        <section className="flex flex-col justify-between my-2 gap-2 shrink-0 min-w-[400px] max-w-[65%]" style={{ width: `${leftWidth}%` }}>
           {/* Problem */}
           <ProblemPanel />
 

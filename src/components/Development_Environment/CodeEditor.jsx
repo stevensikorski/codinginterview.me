@@ -4,7 +4,11 @@ import { ChevronDown, Check, Pencil, PencilOff, Play, Save, ListRestart } from "
 import StarterCode from "./StarterCode";
 import { runCodeWithJudge0 } from "../utilities/judge0";
 
-const languages = [{ key: "python", name: "Python", id: 71 }];
+const languages = [
+  { key: "python", name: "Python", id: 71 },
+  { key: "javascript", name: "JavaScript", id: 93 },
+  { key: "cpp", name: "C++", id: 54 },
+];
 
 export default function CodeEditor({ setActiveTab, setCodeOutput }) {
   const editorRef = useRef(null);
@@ -95,7 +99,7 @@ export default function CodeEditor({ setActiveTab, setCodeOutput }) {
 
       setCodeOutput(finalOutput);
     } catch (err) {
-      setCodeOutput("❌ Error: " + err.message);
+      setCodeOutput("Error: " + err.message);
     }
   };
 
