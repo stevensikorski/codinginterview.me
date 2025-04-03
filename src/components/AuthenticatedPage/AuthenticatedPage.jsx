@@ -49,34 +49,28 @@ export default function AuthenticatedPage() {
           <div className="max-w-[800px] mx-auto">
             <h1 className="text-3xl font-bold text-primary mb-6">Welcome to codinginterview.me</h1>
 
-            <p className="text-lg text-dark-100 mb-8">Choose your role to begin a coding interview session</p>
+            <p className="text-lg text-dark-100 mb-8">Begin or join a coding interview session</p>
 
-            <div className="flex gap-6">
-              {/*interviewer card*/}
-              <div className="bg-white p-6 rounded-lg shadow-md border border-neutral-200 w-1/2 flex flex-col">
-                <h2 className="text-xl font-bold text-dark mb-3">Start as Interviewer</h2>
-                <p className="text-dark-100 mb-4 flex-grow">Create a session. You'll be able to select problems</p>
-                <button onClick={startAsInterviewer} className="w-full py-3 rounded-md bg-primary text-light font-bold">
-                  Start as Interviewer
-                </button>
-              </div>
-
-              {/*interviewee card*/}
-              <div className="bg-white p-6 rounded-lg shadow-md border border-neutral-200 w-1/2 flex flex-col">
-                <h2 className="text-xl font-bold text-dark mb-3">Start as Interviewee</h2>
-                <p className="text-dark-100 mb-4 flex-grow">Join a session and solve coding problems. You'll wait for an interviewer to select a problem for you.</p>
-                <button onClick={startAsInterviewee} className="w-full py-3 rounded-md bg-primary text-light font-bold">
-                  Start as Interviewee
-                </button>
-              </div>
+            {/*main interviewer card*/}
+            <div className="bg-white p-6 rounded-lg shadow-md border border-neutral-200 mb-6">
+              <h2 className="text-xl font-bold text-dark mb-3">Create an Interview Session</h2>
+              <p className="text-dark-100 mb-4">
+                As an interviewer, you can create a new session and share the invitation link with your interviewee.
+              </p>
+              <button onClick={startAsInterviewer} className="py-3 px-6 rounded-md bg-primary text-light font-bold">
+                Create Session
+              </button>
             </div>
 
-            {/*session link input*/}
-            <div className="mt-8 p-6 bg-white rounded-lg shadow-md border border-neutral-200">
-              <h2 className="text-xl font-bold text-dark mb-3">Join with Invitation Link</h2>
+            {/*interviewee section - join with invitation link */}
+            <div className="bg-white p-6 rounded-lg shadow-md border border-neutral-200">
+              <h2 className="text-xl font-bold text-dark mb-3">Join an Interview Session</h2>
+              <p className="text-dark-100 mb-4">
+                Paste the invitation link shared by your interviewer to join their session as an interviewee.
+              </p>
               <div className="flex gap-2">
                 <input type="text" placeholder="Paste invitation link here" className="flex-grow px-4 py-2 border rounded-md" />
-                <button className="px-6 py-2 bg-primary text-light font-bold rounded-md">Join</button>
+                <button className="px-6 py-2 bg-primary text-light font-bold rounded-md">Join Session</button>
               </div>
             </div>
           </div>
