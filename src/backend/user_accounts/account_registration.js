@@ -39,18 +39,18 @@ const handleRegistration = async (userCredObj) => {
         registration_status.redirect_url = "/authenticated"
 
         // Set user registration information to database
-        userInfo = {
+        const userInfo = {
             userID: uid,
             signedInWith: "email",
             authenticationMethods: {
                 email: {
                     email: registerEmail,
-                    email_verified: false
                 }
             },
             createdAt: getCurrDateTime(),
             updatedAt: getCurrDateTime()
         }
+        console.log(userInfo)
         setUser(uid, userInfo)
         return registration_status      
     } catch (error) {

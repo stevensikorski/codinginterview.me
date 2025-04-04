@@ -6,7 +6,7 @@ import Header from "../shared/Header";
 import Footer from "../shared/Footer";
 
 // utility functions
-import { getUser } from "../utilities/auth_context";
+import { getUser, isEmailVerified } from "../utilities/auth_context";
 
 // socket client
 import io from "socket.io-client";
@@ -41,25 +41,13 @@ const startAsInterviewee = () => {
 };
 
 export default function AuthenticatedPage() {
-  // useEffect(() => {
-  //   // SocketIO client object
-  //   const socket = io('http://localhost:3002/', {
-  //     path: '/createsession'
-  //   });
-  //   socket.on("thelegend69's event", (msg) => {
-  //     console.log(msg)
-  //   })
-  //   socket.emit("thelegend69's event", 'thelegend69 message')
-
-  //   // socket.on("message", (data) => {
-  //   //   console.log("Received data from backend: ", data)
-  //   // })
-
-  //   return () => {
-  //     socket.disconnect()
-  //   }
-  // }, [])
-
+  useEffect(() => {
+    const checkEmailVerification = async () => {
+      const status = await isEmailVerified()
+      console.log(status)
+    }
+    checkEmailVerification() 
+  }, [])
   return (
     <div className="min-h-screen flex flex-col min-w-[1024px]">
       <Header />

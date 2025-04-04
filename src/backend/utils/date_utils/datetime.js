@@ -12,7 +12,9 @@ const estDate = {
 }
   
 
-const getCurrDateTime = () => {
+// Human-Readable version of current time in EST
+const getCurrDateTime = (unixTimestamp) => {
     return (new Date().toLocaleString('en-US', estDate))
-}
+};
+
 export { getCurrDateTime }

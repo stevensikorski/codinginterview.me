@@ -1,11 +1,10 @@
 import React from "react";
 import { firebase_client } from "../config_files/firebase-client-config.js"
-import { getAuth, signInWithCustomToken } from "firebase/auth"
+import { getAuth, signInWithCustomToken, sendEmailVerification } from "firebase/auth"
 
 // Email registration 
 const handleEmail = async (event) => {
   event.preventDefault()
-  console.log("handling email")
 
   // Form element that invoked the callback funciton
   const form = new FormData(event.target)
@@ -37,10 +36,18 @@ const handleEmail = async (event) => {
       signInWithCustomToken(auth, data.jwt_token)
         .then((userCredential) => {
           // Signed in
+          const user = userCredential.user
+
           // First, store the JWT token in localStorage so that user authentication state is tracked in multiple paths
-          userCredential.user.getIdToken().then((token) => {
+          user.getIdToken().then((token) => {
             localStorage.setItem("jwtToken", token)
           })
+
+          // EMAIL VERIFICATION (DISABLE WHEN TESTING)
+          sendEmailVerification(user)
+            .then(() => {
+              console.log("Email verification sent!")
+            })
 
           //redirect to /authenticated
           window.location.href = data.redirect_url

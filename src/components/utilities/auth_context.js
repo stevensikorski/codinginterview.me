@@ -47,4 +47,15 @@ const isAuthenticated = async () => {
   }
 };
 
-export { getLocalToken, removeToken, isAuthenticated, getUser };
+//function to check if user email is verified
+const isEmailVerified = async () => {
+  const auth = getAuth()
+  const user = auth.currentUser
+  await user.reload()
+
+  if (user.emailVerified)
+    return true 
+  return false
+}
+
+export { getLocalToken, removeToken, isAuthenticated, getUser, isEmailVerified};

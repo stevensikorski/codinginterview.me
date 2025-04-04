@@ -10,7 +10,6 @@ export default function Header({ openModal }) {
     const checkAuthState = async () => {
       //check for token first (faster than waiting for Firebase)
       const getUserAuthState = await isUserAuthenticated()
-      console.log(getUserAuthState)
       if (getUserAuthState) {
         setIsAuthenticated(true);
       }
@@ -45,7 +44,6 @@ export default function Header({ openModal }) {
     window.location.href = "/";
   };
 
-  console.log(isAuthenticated)
   //logo destination changes based on authentication state
   const homeLink = isAuthenticated ? "/authenticated" : "/";
 

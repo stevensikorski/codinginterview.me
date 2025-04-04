@@ -1,7 +1,6 @@
 // Other custom modules
 import { express, app, server, io, generateRoom } from "./backend/user_sessions/session.js"; // For room creation
 import { registerUserRoutes } from "./backend/user_accounts/account_registration.js"; // For Account registration
-import { useId } from "react";
 
 // Initialize backend
 app.use(express.json());  
@@ -21,14 +20,14 @@ io.on('connection', (socket) => {
   // Listen for specific event names (specified by socket-client)
   socket.on("createroom", (msg) => {
     const { uid, jwtToken } = msg
-    const roomPath = generateRoom(uid, jwtToken)
+    const room = generateRoom(uid, jwtToken)
 
     // If roomPath is null, the current user is already associated with a room 
-    if (!roomPath) 
+    if (!room) 
       socket.emit("messageResponse", "user is already in a room.")
     else
     // Otherwise, returns the unique room path to the emitting socket only in the frontend
-      socket.emit("messageResponse", roomPath)
+      socket.emit("messageResponse", room)
 
   })
 
