@@ -4,7 +4,11 @@ import { ChevronDown, Check, Pencil, PencilOff, Play, Save, ListRestart } from "
 import StarterCode from "./StarterCode";
 import { runCodeWithJudge0 } from "../utilities/judge0";
 
-const languages = [{ key: "python", name: "Python", id: 71 }];
+const languages = [
+  { key: "python", name: "Python", id: 71 },
+  { key: "javascript", name: "JavaScript", id: 93 },
+  { key: "cpp", name: "C++", id: 54 },
+];
 
 export default function CodeEditor({ setActiveTab, setCodeOutput }) {
   const editorRef = useRef(null);
@@ -95,7 +99,7 @@ export default function CodeEditor({ setActiveTab, setCodeOutput }) {
 
       setCodeOutput(finalOutput);
     } catch (err) {
-      setCodeOutput("❌ Error: " + err.message);
+      setCodeOutput("Error: " + err.message);
     }
   };
 
@@ -109,7 +113,7 @@ export default function CodeEditor({ setActiveTab, setCodeOutput }) {
             <ChevronDown className="size-5 p-0.5 text-neutral-600 transition-transform duration-200 group-hover:rotate-180" />
           </button>
 
-          <div className="hidden group-hover:flex flex-col absolute left-0 top-full bg-editor border shadow border-neutral-800 rounded-lg shadow-neutral-950/75 z-20 p-1 space-y-1">
+          <div className="hidden group-hover:flex flex-col absolute left-0 top-full bg-editor border shadow border-neutral-800 rounded-lg z-20 p-1 space-y-1">
             {languages.map(({ key, name }) => (
               <button
                 key={key}
