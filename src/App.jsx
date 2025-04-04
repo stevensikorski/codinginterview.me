@@ -18,6 +18,7 @@ import Header from "./components/shared/Header";
 import DevelopmentEnvironmentPage from "./components/Development_Environment/EditorPage";
 import AuthenticatedPage from "./components/AuthenticatedPage/AuthenticatedPage";
 import Session from "./components/Session/Session.jsx";
+import Room from "./components/Room/Room.jsx";
 
 // import utility functions and components
 import { ProtectedRoute } from "./components/utilities/ProtectedRoutes.jsx";
@@ -98,6 +99,9 @@ export default function Main() {
         redirects once, there won't be a further redirect to the 'path' specified in Router */}
         <Route path="/authenticated" element={
           <ProtectedRoute element={<AuthenticatedPage />} />
+        } />
+        <Route path="/rooms/:roomId/ide" element={
+          <ProtectedRoute element={<Room />} />
         } />
       </Routes>
     </Router>
