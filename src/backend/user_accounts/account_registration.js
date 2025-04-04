@@ -1,8 +1,10 @@
 // Firebase authentication 
-import { auth, rtdb } from '../config_files/firebase-admin-config.js'
+import { auth } from '../config_files/firebase-admin-config.js'
 
 // Utility functions
 import { createJWTToken } from '../utils/firebase_utils/auth_utils.js'
+import { setUser } from '../utils/firebase_utils/realtime_db_utils.js'
+import { getCurrDateTime } from '../utils/date_utils/datetime.js'
 
 // Asynchronous function that handles registration with Firebase Authentication ('auth' object)
 // Email registration
@@ -36,9 +38,8 @@ const handleRegistration = async (userCredObj) => {
         registration_status.jwt_token = await createJWTToken(uid)  //JWT token for authentication passed to frontend
         registration_status.redirect_url = "/authenticated"
 
-        // Insert user registration information to database
-        const userRef = rtdb.ref("users/" + uid)
-        await userRef.set({
+        // Set user registration information to database
+        userInfo = {
             userID: uid,
             signedInWith: "email",
             authenticationMethods: {
@@ -47,10 +48,10 @@ const handleRegistration = async (userCredObj) => {
                     email_verified: false
                 }
             },
-            createdAt: Date.now(),
-            updatedAt: Date.now()
-        })
-        console.log("user data added to rtdb")
+            createdAt: getCurrDateTime(),
+            updatedAt: getCurrDateTime()
+        }
+        setUser(uid, userInfo)
         return registration_status      
     } catch (error) {
         // Firebase error messages

@@ -1,33 +1,44 @@
-// ExpressJS Middleware
-import express from "express";
-
-// Allowing network requests from frontend to backend
-import cors from 'cors';
-
 // Other custom modules
+import { express, app, server, io, generateRoom } from "./backend/user_sessions/session.js"; // For room creation
 import { registerUserRoutes } from "./backend/user_accounts/account_registration.js"; // For Account registration
-import { registerSessionRoutes } from "./backend/user_sessions/session.js"; // For room creation
+import { useId } from "react";
 
 // Initialize backend
-const app = express();
-const port = process.env.BACKEND_PORT;
-
-// Configure backend policies
 app.use(express.json());  
-app.use(cors());
-
 
 // Middleware to parse form data (application/x-www-form-urlencoded)
 app.use("/", express.urlencoded({ extended: true }));
+const port = process.env.BACKEND_PORT;
 
 // Initialize the routes for imported js files
 // registration.js, for user account registration
 registerUserRoutes(app)
 
-// session.js, for real-time video chats
-registerSessionRoutes(app)
+// Listen for socket connection
+io.on('connection', (socket) => {
+  console.log("a user has connected")
+
+  // Listen for specific event names (specified by socket-client)
+  socket.on("createroom", (msg) => {
+    const { uid, jwtToken } = msg
+    const roomPath = generateRoom(uid, jwtToken)
+
+    // If roomPath is null, the current user is already associated with a room 
+    if (!roomPath) 
+      socket.emit("messageResponse", "user is already in a room.")
+    else
+    // Otherwise, returns the unique room path to the emitting socket only in the frontend
+      socket.emit("messageResponse", roomPath)
+
+  })
+
+  // Handle disconnections: A user is disconnected whenever a React component is unmounted
+  socket.on('disconnect', () => {
+    console.log("a user has disconnected")
+  })
+})
 
 // Start the server
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
