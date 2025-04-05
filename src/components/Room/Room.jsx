@@ -56,7 +56,7 @@ function Room() {
       getRoomUsers();
     };
     runSequence();
-  }, []);
+  }, [roomId]);
 
   if (isLoading) return <div>Loading...</div>;
 
