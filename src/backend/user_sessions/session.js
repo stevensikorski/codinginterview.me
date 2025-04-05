@@ -44,7 +44,7 @@ const io = new Server(server, {
 // Room validation to check for valid room 
 app.get('/rooms/:id/validate', async (req, res) => {
     const roomId = req.params.id; 
-    console.log("Room ID receiver from frontend: ", roomId)
+    console.log("Room ID received from frontend: ", roomId)
 
     const session = await getSession(roomId)
     console.log("session = ", session)

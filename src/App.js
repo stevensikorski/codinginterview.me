@@ -1,6 +1,7 @@
 // Other custom modules
 import { express, app, server, io, generateRoom } from "./backend/user_sessions/session.js"; // For room creation
 import { registerUserRoutes } from "./backend/user_accounts/account_registration.js"; // For Account registration
+import { getSession } from "./backend/utils/firebase_utils/realtime_db_utils.js";
 
 // Initialize backend
 app.use(express.json());  
@@ -18,6 +19,7 @@ io.on('connection', (socket) => {
   console.log("a user has connected")
 
   // Listen for specific event names (specified by socket-client)
+  // Listen for 'createroom' event
   socket.on("createroom", (msg) => {
     const { uid, jwtToken } = msg
     const room = generateRoom(uid, jwtToken)
@@ -28,8 +30,39 @@ io.on('connection', (socket) => {
     else
     // Otherwise, returns the unique room path to the emitting socket only in the frontend
       socket.emit("messageResponse", room)
-
   })
+
+  // Listen for 'bind_room_user' event, which checks if current user 
+  // can enter room. If so, bind current user to this room.
+  socket.on("bind_room_user", async (msg) => {
+    const { uid, roomId } = msg
+
+    // User is either an interviewer or not an interviewer but all users
+    // must be authenticated already 
+    const session = await getSession(roomId)
+    if (session && session.sessionCreatorId === uid){
+      // Interviewer 
+      socket.join(roomId)
+      console.log("interviewer joined room")
+    }
+    else{
+      // Non-interviewer
+      socket.join(roomId)
+      console.log("non-interviewer joined room")
+    }
+    
+  })
+
+  // Get all users in a room
+  socket.on('get_room_users', (msg) => {
+    const { roomId } = msg;
+    const room = io.sockets.adapter.rooms.get(roomId); // Get the room object
+    const usersInRoom = room ? Array.from(room) : []; // Get all socket IDs in the room
+    console.log('Users in room', roomId, usersInRoom);
+    
+    // Emit the list of users to the requesting client
+    socket.emit('get_room_users', usersInRoom);
+  });
 
   // Handle disconnections: A user is disconnected whenever a React component is unmounted
   socket.on('disconnect', () => {
