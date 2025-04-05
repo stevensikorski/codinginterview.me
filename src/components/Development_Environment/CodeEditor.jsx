@@ -59,8 +59,19 @@ export default function CodeEditor({ setActiveTab, setCodeOutput }) {
     });
   };
 
-  const handleEditorMount = (editor) => {
+  const handleEditorMount = (editor, monaco) => {
     editorRef.current = editor;
+
+    //custom theme with orange comments
+    monaco.editor.defineTheme('coding-interview-theme', {
+      base: 'vs-dark',
+      inherit: true,
+      rules: [
+        { token: 'comment', foreground: 'EB5528' } //orange color for comments
+      ],
+      colors: {}
+    });
+    monaco.editor.setTheme('coding-interview-theme');
     editor.onDidChangeCursorPosition((event) => {
       setPosition({
         line: event.position.lineNumber,

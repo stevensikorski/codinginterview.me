@@ -2,20 +2,31 @@ import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-export default function ProblemPanel() {
-  // temporary placeholder for the problem section
-  const markdownContent = `Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.
+export default function ProblemPanel({ selectedProblem }) {
+  //default content if no problem is selected
+  const defaultProblem = {
+    title: "Select a Problem",
+    difficulty: "Medium",
+    tags: ["Example", "Tags"],
+    description: "Please select a problem from the problem selection panel to start your coding interview practice."
+  };
 
-Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.
+  //use selected problem or default
+  const problem = selectedProblem || defaultProblem;
 
-Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.
-
-Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.
-
-Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.
-
-Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.
-  `;
+  //function to determine difficulty class
+  const getDifficultyClass = (difficulty) => {
+    switch (difficulty) {
+      case "Easy":
+        return "text-green-700 border-green-700/25 bg-green-700/25";
+      case "Medium":
+        return "text-[#EB5528] border-[#EB5528]/25 bg-[#EB5528]/10";
+      case "Hard":
+        return "text-red-700 border-red-700/25 bg-red-700/25";
+      default:
+        return "text-neutral-600 border-neutral-800";
+    }
+  };
 
   return (
     <div className="flex flex-col flex-grow rounded-lg border shadow bg-editor border-neutral-800 overflow-y-hidden">
@@ -23,22 +34,27 @@ Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapi
         <p className="p-1 font-semibold text-neutral-600">Problem</p>
       </div>
 
-      {/* Problem Header Section */}
+      {/*problem header section*/}
       <div className="flex flex-col gap-2 p-4 border-b border-neutral-800">
-        <h1 className="text-xl font-bold text-white">Problem Name Placeholder</h1>
+        <h1 className="text-xl font-bold text-white">{problem.title}</h1>
         <div className="flex flex-wrap gap-1">
-          {/* <p className="flex items-center px-2 text-sm font-medium rounded-full border shadow text-green-700 border-green-700/25 bg-green-700/25">Easy</p> */}
-          <p className="flex items-center px-2 text-sm font-medium rounded-full border shadow text-yellow-500 border-yellow-500/25 bg-yellow-700/25">Medium</p>
-          {/* <p className="flex items-center px-2 text-sm font-medium rounded-full border shadow text-red-700 border-red-700/25 bg-red-700/25">Hard</p> */}
-          <p className="flex items-center px-2 text-sm font-medium rounded-full border shadow text-neutral-600 border-neutral-800">Label</p>
-          <p className="flex items-center px-2 text-sm font-medium rounded-full border shadow text-neutral-600 border-neutral-800">Label</p>
+          <p className={`flex items-center px-2 text-sm font-medium rounded-full border shadow ${getDifficultyClass(problem.difficulty)}`}>
+            {problem.difficulty}
+          </p>
+          {problem.tags.map((tag, index) => (
+            <p key={index} className="flex items-center px-2 text-sm font-medium rounded-full border shadow text-neutral-600 border-neutral-800">
+              {tag}
+            </p>
+          ))}
         </div>
       </div>
 
-      {/* Markdown Content */}
+      {/*markdown content*/}
       <div className="relative flex-1 min-h-0">
-        <div className="absolute inset-0 overflow-y-scroll p-4 break-words text-wrap markdown [&::-webkit-scrollbar]:w-0">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdownContent}</ReactMarkdown>
+        <div className="absolute inset-0 overflow-y-scroll p-4 break-words text-wrap markdown [&::-webkit-scrollbar]:w-0 text-neutral-300">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {problem.description}
+          </ReactMarkdown>
           <p className="pt-4 opacity-25">codinginterview.me</p>
         </div>
         <span className="pointer-events-none absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-editor to-transparent z-50" />
