@@ -29,6 +29,9 @@ jobs:
         run: echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" | base64 --decode > "$HOME/firebase-key.json"
 
       - name: Build Main Branch
+        env:
+          REACT_APP_RAPIDAPI_KEY: ${{ secrets.REACT_APP_RAPIDAPI_KEY }}
+          REACT_APP_RAPIDAPI_HOST: ${{ secrets.REACT_APP_RAPIDAPI_HOST }}
         run: npm run build
 
       - name: Deploy to Firebase Main
@@ -60,6 +63,9 @@ jobs:
         run: echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" | base64 --decode > "$HOME/firebase-key.json"
 
       - name: Build Dev Branch
+        env:
+          REACT_APP_RAPIDAPI_KEY: ${{ secrets.REACT_APP_RAPIDAPI_KEY }}
+          REACT_APP_RAPIDAPI_HOST: ${{ secrets.REACT_APP_RAPIDAPI_HOST }}
         run: npm run build
 
       - name: Deploy to Firebase Dev

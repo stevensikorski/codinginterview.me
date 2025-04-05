@@ -14,40 +14,40 @@ import io from "socket.io-client";
 const startAsInterviewer = async () => {
   //navigate to problem selection
   try {
-    const user = await getUser()
+    const user = await getUser();
 
     //send request to make a room in backend
-    if (user){
+    if (user) {
       const jwtToken = await user.getIdToken();
-      const uid = user.uid
+      const uid = user.uid;
 
       // SocketIO client object
-      const socket = io('http://localhost:3002/', {
-        path: '/createsession'
+      const socket = io("http://localhost:3002/", {
+        path: "/createsession",
       });
 
-      socket.emit("createroom", {uid, jwtToken})
+      socket.emit("createroom", { uid, jwtToken });
       socket.on("messageResponse", (roomPath) => {
-        console.log("Room path from backend: ", roomPath)
-      })
+        console.log("Room path from backend: ", roomPath);
+      });
     }
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
 };
 
-const startAsInterviewee = () => {
-  //navigate to waiting room
-};
+// const startAsInterviewee = () => {
+//   //navigate to waiting room
+// };
 
 export default function AuthenticatedPage() {
   useEffect(() => {
     const checkEmailVerification = async () => {
-      const status = await isEmailVerified()
-      console.log(status)
-    }
-    checkEmailVerification() 
-  }, [])
+      const status = await isEmailVerified();
+      console.log(status);
+    };
+    checkEmailVerification();
+  }, []);
   return (
     <div className="min-h-screen flex flex-col min-w-[1024px]">
       <Header />
@@ -62,9 +62,7 @@ export default function AuthenticatedPage() {
             {/*main interviewer card*/}
             <div className="bg-white p-6 rounded-lg shadow-md border border-neutral-200 mb-6">
               <h2 className="text-xl font-bold text-dark mb-3">Create an Interview Session</h2>
-              <p className="text-dark-100 mb-4">
-                As an interviewer, you can create a new session and share the invitation link with your interviewee.
-              </p>
+              <p className="text-dark-100 mb-4">As an interviewer, you can create a new session and share the invitation link with your interviewee.</p>
               <button onClick={startAsInterviewer} className="py-3 px-6 rounded-md bg-primary text-light font-bold">
                 Create Session
               </button>
@@ -73,9 +71,7 @@ export default function AuthenticatedPage() {
             {/*interviewee section - join with invitation link */}
             <div className="bg-white p-6 rounded-lg shadow-md border border-neutral-200">
               <h2 className="text-xl font-bold text-dark mb-3">Join an Interview Session</h2>
-              <p className="text-dark-100 mb-4">
-                Paste the invitation link shared by your interviewer to join their session as an interviewee.
-              </p>
+              <p className="text-dark-100 mb-4">Paste the invitation link shared by your interviewer to join their session as an interviewee.</p>
               <div className="flex gap-2">
                 <input type="text" placeholder="Paste invitation link here" className="flex-grow px-4 py-2 border rounded-md" />
                 <button className="px-6 py-2 bg-primary text-light font-bold rounded-md">Join Session</button>

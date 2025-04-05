@@ -123,8 +123,19 @@ export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket
     });
   };
 
-  const handleEditorMount = (editor) => {
+  const handleEditorMount = (editor, monaco) => {
     editorRef.current = editor;
+
+    //custom theme with orange comments
+    monaco.editor.defineTheme('coding-interview-theme', {
+      base: 'vs-dark',
+      inherit: true,
+      rules: [
+        { token: 'comment', foreground: 'EB5528' } //orange color for comments
+      ],
+      colors: {}
+    });
+    monaco.editor.setTheme('coding-interview-theme');
     editor.onDidChangeCursorPosition((event) => {
       setPosition({
         line: event.position.lineNumber,
@@ -177,7 +188,8 @@ export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket
             <ChevronDown className="size-5 p-0.5 text-neutral-600 transition-transform duration-200 group-hover:rotate-180" />
           </button>
 
-          <div className="hidden group-hover:flex flex-col absolute left-0 top-full bg-editor border shadow border-neutral-800 rounded-lg z-20 p-1 space-y-1">
+          {/* Dropdown */}
+          <div className="hidden group-hover:flex flex-col absolute left-0 top-full bg-editor border-r border-y shadow border-neutral-800 rounded-br-lg z-20 p-1">
             {languages.map(({ key, name }) => (
               <button
                 key={key}
