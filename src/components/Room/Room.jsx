@@ -18,11 +18,6 @@ function Room() {
   });
   console.log(socket)
   useEffect(() => {
-    // SocketIO client object
-    const socket = io("http://localhost:3002/", {
-      path: "/createsession",
-    });
-
     const validateCurrentRoom = async () => {
       const response = await fetch(`http://localhost:3002/rooms/${roomId}/validate`); // Fetch the room data using the ID;
       // const data = await response.json()
