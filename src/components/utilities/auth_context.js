@@ -42,7 +42,7 @@ const isAuthenticated = async () => {
   }
 
   const firebaseToken = await user.getIdToken()
-  if (getLocalToken() == firebaseToken){
+  if (getLocalToken() === firebaseToken){
     return true
   }
 };

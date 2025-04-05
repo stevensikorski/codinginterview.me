@@ -7,7 +7,8 @@ import { AlignJustify, Columns2, ClipboardCheck, Settings } from "lucide-react";
 import ProblemSelection from "./ProblemSelection";
 import ProblemPanel from "./ProblemPanel";
 
-export default function DevelopmentEnvironmentPage() {
+export default function DevelopmentEnvironmentPage({roomId, socket}) {
+  console.log(socket)
   const [activeTab, setActiveTab] = useState("editor");
   const [isParticipantsOpen, setIsParticipantsOpen] = useState(false);
   const [leftWidth, setLeftWidth] = useState(35);
@@ -90,7 +91,7 @@ export default function DevelopmentEnvironmentPage() {
 
           <div className="flex flex-col flex-grow">
             <div className={activeTab === "editor" ? "flex-grow flex" : "hidden"}>
-              <CodeEditor setActiveTab={setActiveTab} setCodeOutput={setCodeOutput} />
+              <CodeEditor setActiveTab={setActiveTab} setCodeOutput={setCodeOutput} roomId={roomId} socket={socket} />
             </div>
             <div className={activeTab === "notepad" ? "flex-grow flex" : "hidden"}>
               <NoteEditor />

@@ -59,6 +59,7 @@ app.get('/rooms/:id/validate', async (req, res) => {
         // Valid session
         res.status(200).json({
             success: true, 
+            message: "Valid Room."
         })
     }
 });

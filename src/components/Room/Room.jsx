@@ -10,20 +10,19 @@ import DevelopmentEnvironmentPage from '../Development_Environment/EditorPage';
 function Room() {
   // Get the room ID from the URL
   const { roomId } = useParams();
-  
   const [isLoading, setIsLoading] = useState(true)
   const [isValidRoom, setIsValidRoom] = useState(false)
 
+  const socket = io('http://localhost:3002/', { 
+    path: '/createsession' 
+  });
+  console.log(socket)
   useEffect(() => {
-    // SocketIO client object
-    const socket = io('http://localhost:3002/', {
-        path: '/createsession'
-    });
-
     const validateCurrentRoom = async () => {
       const response = await fetch(`http://localhost:3002/rooms/${roomId}/validate`); // Fetch the room data using the ID;
       const data = await response.json()
-
+      console.log("Is room valid: ", data.message)
+      console.log(socket)
       // HTTP Code 200 (OK)
       if (response.ok){
         // Room is valid 
@@ -41,6 +40,7 @@ function Room() {
       const uid = user.uid
 
       socket.emit("bind_room_user", {uid, roomId})
+      console.log("binding room user...")
     }
 
     // Get all users in room
@@ -58,7 +58,11 @@ function Room() {
         getRoomUsers()
     }
     runSequence()
-  }, []);
+
+    return () => {
+      socket.disconnect()
+    }
+  }, [socket]);
 
   if (isLoading)
     return <div>Loading...</div>
@@ -66,7 +70,7 @@ function Room() {
   if (!isValidRoom)
     return <div>Unauthorized</div>;
   else
-    return <DevelopmentEnvironmentPage />;
+    return <DevelopmentEnvironmentPage roomId={roomId} socket={socket} />;
 }
 
 export default Room;

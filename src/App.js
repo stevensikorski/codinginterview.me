@@ -37,20 +37,26 @@ io.on('connection', (socket) => {
   socket.on("bind_room_user", async (msg) => {
     const { uid, roomId } = msg
 
+    console.log("attempting to bind user to room")
+    // Remove the socket from its own `socket.id` room (the default behavior in Socket.io)
+    socket.leave(socket.id); // This leaves the automatic room created by `socket.id`
+
     // User is either an interviewer or not an interviewer but all users
     // must be authenticated already 
     const session = await getSession(roomId)
-    if (session && session.sessionCreatorId === uid){
-      // Interviewer 
-      socket.join(roomId)
-      console.log("interviewer joined room")
+    if (session){
+      if (session.sessionCreatorId === uid){
+        // Interviewer 
+        socket.join(roomId)
+        console.log("interviewer joined room")
+      }
+      else{
+        // Non-interviewer
+        socket.join(roomId)
+        console.log("non-interviewer joined room")
+        console.log("joined room id: ", socket.rooms)
+      }
     }
-    else{
-      // Non-interviewer
-      socket.join(roomId)
-      console.log("non-interviewer joined room")
-    }
-    
   })
 
   // Get all users in a room
@@ -63,6 +69,17 @@ io.on('connection', (socket) => {
     // Emit the list of users to the requesting client
     socket.emit('get_room_users', usersInRoom);
   });
+
+  // Sychronize editor codes for users in same room
+  socket.on('synchronize_code', (msg) => {
+    const { roomId, newCode } = msg;
+    const socketRoomId = socket.rooms
+    console.log("synchronizing code...");
+    console.log(roomId, socketRoomId, newCode);
+
+    // Broadcast the updated code to all other users in the same room
+    socket.broadcast.to(roomId).emit('synchronize_code', newCode);
+  })
 
   // Handle disconnections: A user is disconnected whenever a React component is unmounted
   socket.on('disconnect', () => {

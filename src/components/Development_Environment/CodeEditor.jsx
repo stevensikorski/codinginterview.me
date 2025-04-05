@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Editor from "@monaco-editor/react";
 import { ChevronDown, Check, Pencil, PencilOff, Play, Save, ListRestart } from "lucide-react";
 import StarterCode from "./StarterCode";
@@ -10,7 +10,7 @@ const languages = [
   { key: "cpp", name: "C++", id: 54 },
 ];
 
-export default function CodeEditor({ setActiveTab, setCodeOutput }) {
+export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket }) {
   const editorRef = useRef(null);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -24,6 +24,70 @@ export default function CodeEditor({ setActiveTab, setCodeOutput }) {
 
   const fontSizes = [10, 12, 14, 16, 18, 20];
   const tabSizes = [2, 4];
+
+  // Timeout function to automatically save and synchronize code
+  const debounceTimeout = useRef(null);
+
+  // Check if code is being pushed 
+  const pushCodeStatus = useRef(null);
+
+  const pushCodeUpdate = () => {
+    // Clear any previous timeout
+    clearTimeout(debounceTimeout.current)
+    if (!pushCodeStatus.current){
+      // Save copy of code and sychronize it with other users in room
+      // whenever user starts typing and then stops typing for 300ms
+      if (editorRef.current){
+        const value = editorRef.current.getValue() || ""
+        debounceTimeout.current = setTimeout(() => {
+          // SocketIO client object
+          socket.emit("synchronize_code", {roomId, newCode:value})
+        }, 200)
+      }
+    }
+  }
+
+  // Reflect incoming code changes to sychronize code
+  useEffect(() => {
+    console.log("useEffect is run")
+    if (!socket) {
+      console.log("Socket is not defined yet");
+      return; // Prevent running the effect if socket is not available
+    }
+
+    const handleSynchronizedCode = (newCode) => {
+      console.log("NEWCODE: ", newCode)
+      // Code is being received, so do not trigger outgoing code changes until push is done
+      pushCodeStatus.current = true
+
+      // During this time, only accept incoming code changes
+      // setCode(newCode)
+      let cursorPosition = null
+      if (editorRef.current) {
+        cursorPosition = editorRef.current.getPosition();  // Get the current cursor position
+        editorRef.current.setValue(newCode);  // Set the new code in the editor
+
+      }
+    
+      // After the content is updated, restore the cursor position
+      if (editorRef.current && cursorPosition) {
+        editorRef.current.setPosition(cursorPosition);  // Restore the cursor position
+      }
+
+      // Done 
+      pushCodeStatus.current = false
+
+      // Once code is pushed, the user could have typed more code during this period, so trigger timeout again
+      // pushCodeUpdate()
+
+    }
+
+    // Listen for incoming code updates
+    socket.on('synchronize_code', handleSynchronizedCode)
+    return () => {
+      socket.off('synchronize_code', handleSynchronizedCode)
+    }
+  }, []);
 
   const rotateFontSize = () => {
     const nextIndex = (fontSizes.indexOf(fontSize) + 1) % fontSizes.length;
@@ -156,10 +220,13 @@ export default function CodeEditor({ setActiveTab, setCodeOutput }) {
           loading=""
           onMount={handleEditorMount}
           onChange={(value) => {
-            console.log("Code changed:", value);
-            setCode(value || "");
-            if (isOpen) setIsOpen(false);
-          }}
+              console.log("ONCHANGED TRIEGGGERED")
+              pushCodeUpdate();
+              // console.log("Code changed:", value);
+              setCode(value || "");
+              if (isOpen) setIsOpen(false);
+            }
+          }
           options={{
             automaticLayout: true,
             minimap: { enabled: false },
