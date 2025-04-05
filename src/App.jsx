@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 //React router allows routing to different paths (eg: for redirects)
 // import { BrowserRouter as Router, Route, Routes, useNavigate } from "react-router-dom"; // commented out for deployment to work
 import { BrowserRouter as Router, Route, Routes, useNavigate } from "react-router-dom";
-import { isAuthenticated } from "../src/components/utilities/auth_context.js"
+import { isAuthenticated } from "../src/components/utilities/auth_context.js";
 
 //import compononets
 import FindPartner from "./components/Home/FindPartner";
@@ -33,27 +33,27 @@ function App() {
   //register popup show/hide control
   var [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
 
-  console.log(isLoginModalOpen)
+  console.log(isLoginModalOpen);
   useEffect(() => {
-    if (isLoginModalOpen === true){
+    if (isLoginModalOpen === true) {
       const authState = async () => {
-        const status = await isAuthenticated()
+        const status = await isAuthenticated();
         if (status) navigate("/authenticated");
-      }
-      authState()
-    }}, [isLoginModalOpen])
+      };
+      authState();
+    }
+  }, [isLoginModalOpen, navigate]);
 
   //opens login popup when "sign in" button is clicked
   function handleOpenLoginButtonClick() {
     console.log("User clicked to open login");
     // Set to current state to force authentication check in useEffect
-    setIsLoginModalOpen(true)
+    setIsLoginModalOpen(true);
   }
-  
 
   //closes login popup when X button is clicked
   function handleCloseLoginModal() {
-    console.log("User closed login")
+    console.log("User closed login");
     setIsLoginModalOpen(false);
   }
 
@@ -70,7 +70,7 @@ function App() {
 
   return (
     <div className="min-w-[1024px]">
-      <Header openModal={handleOpenLoginButtonClick} /> 
+      <Header openModal={handleOpenLoginButtonClick} />
       <main>
         {/*sections of home*/}
         <Hero openRegisterModal={handleOpenRegisterButtonClick} />
@@ -97,12 +97,8 @@ export default function Main() {
         <Route path="/session" element={<Session />} />
         {/* The Route component does not allow chained redirects, so if nested component 
         redirects once, there won't be a further redirect to the 'path' specified in Router */}
-        <Route path="/authenticated" element={
-          <ProtectedRoute element={<AuthenticatedPage />} />
-        } />
-        <Route path="/rooms/:roomId/ide" element={
-          <ProtectedRoute element={<Room />} />
-        } />
+        <Route path="/authenticated" element={<ProtectedRoute element={<AuthenticatedPage />} />} />
+        <Route path="/rooms/:roomId/ide" element={<ProtectedRoute element={<Room />} />} />
       </Routes>
     </Router>
   );
