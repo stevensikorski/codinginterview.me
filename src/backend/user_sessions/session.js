@@ -99,7 +99,7 @@ const generateRoom = async (uid) => {
     await updateUser(uid, updateUserInfo)
 
     // Unique room path to be returned to frontend
-    const domainRoot = process.env.REACT_APP_BACKEND_HOST
+    const domainRoot = 'http://localhost:3000/'
     const roomPath = `rooms/${sid}/ide`
 
     // Create a new session and insert into Session entity

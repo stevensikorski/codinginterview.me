@@ -21,15 +21,17 @@ io.on('connection', (socket) => {
     const { uid, jwtToken } = msg
     
     // Perform some authorization checks 
-    verifyJWTToken(jwtToken)
-    if (userHasRoom(uid))
-      socket.emit("createroom", `user is already associated with an existing room: ${await getRoomForUser(uid)}`)
-    
-
-    // Create a new room and respond back to frontend with the room path
-    const room = await generateRoom(uid)
-    console.log(room)
-    socket.emit("createroom", `user is now bind to room: ${room}`)
+    await verifyJWTToken(jwtToken)
+    if ((await userHasRoom(uid))){
+      console.log("user already has room")
+      socket.emit("createroom", (await getRoomForUser(uid)))
+    }
+    else {
+      // Create a new room and respond back to frontend with the room path
+      const room = await generateRoom(uid)
+      console.log("new room is created for user")
+      socket.emit("createroom", room)
+    }
   })
 
   // Listen for 'bind_room_user' event, which checks if current user 
