@@ -3,9 +3,6 @@ import { express, app, server, io, generateRoom } from "./backend/user_sessions/
 import { registerUserRoutes } from "./backend/user_accounts/account_registration.js"; // For Account registration
 import { getSession } from "./backend/utils/firebase_utils/realtime_db_utils.js";
 
-// Initialize backend
-app.use(express.json());  
-
 // Middleware to parse form data (application/x-www-form-urlencoded)
 app.use("/", express.urlencoded({ extended: true }));
 const port = process.env.BACKEND_PORT;
@@ -73,12 +70,16 @@ io.on('connection', (socket) => {
   // Sychronize editor codes for users in same room
   socket.on('synchronize_code', (msg) => {
     const { roomId, newCode } = msg;
-    const socketRoomId = socket.rooms
-    console.log("synchronizing code...");
-    console.log(roomId, socketRoomId, newCode);
-
     // Broadcast the updated code to all other users in the same room
     socket.broadcast.to(roomId).emit('synchronize_code', newCode);
+  })
+
+  // Synchronizes problem selection for users in same room
+  socket.on('problem_panel_synchronization', (msg) => {
+    const { roomId, problem } = msg;
+    console.log("NEW PROBLEM: ", problem)
+    // Broadcast the updated code to all other users in the same room
+    socket.broadcast.to(roomId).emit('problem_panel_synchronization', problem);
   })
 
   // Handle disconnections: A user is disconnected whenever a React component is unmounted

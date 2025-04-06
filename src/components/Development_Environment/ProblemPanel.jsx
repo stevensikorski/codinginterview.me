@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-export default function ProblemPanel({ selectedProblem }) {
+export default function ProblemPanel({ selectedProblem, setSelectedProblem, roomId, socket }) {
   //default content if no problem is selected
   const defaultProblem = {
     title: "Select a Problem",
@@ -12,7 +12,31 @@ export default function ProblemPanel({ selectedProblem }) {
   };
 
   //use selected problem or default
-  const problem = selectedProblem || defaultProblem;
+  const problem = selectedProblem || defaultProblem
+  useEffect(() => {
+    const handleProblemPanelSync = (newProblem) => {
+      // Since React uses shallow comparison, compare contents of objects
+      if (JSON.stringify(selectedProblem) !== JSON.stringify(newProblem)){
+        console.log("OBJECTS ARE DIFFERENT")
+        console.log(selectedProblem)
+        console.log(JSON.stringify(newProblem))
+        setSelectedProblem(newProblem)
+      }
+    }
+
+    const syncProblemPanel = () => {
+      console.log(selectedProblem)
+      console.log("syncing problem at frontend")
+      socket.on("problem_panel_synchronization", handleProblemPanelSync)
+      socket.emit("problem_panel_synchronization", {roomId, problem:selectedProblem})
+    }
+    syncProblemPanel()
+
+    // Cleanup the listener when the component is unmounted or the dependencies change
+    return () => {
+      socket.off("problem_panel_synchronization", handleProblemPanelSync);
+    };
+  }, [selectedProblem])
 
   //function to determine difficulty class
   const getDifficultyClass = (difficulty) => {

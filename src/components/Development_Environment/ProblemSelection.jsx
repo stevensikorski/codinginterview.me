@@ -69,7 +69,7 @@ const problems = {
   }
 };
 
-export default function ProblemSelection({ isClose, onClose, onSelectProblem, roomId }) {
+export default function ProblemSelection({ isClose, onClose, onSelectProblem, roomId}) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDifficulty, setSelectedDifficulty] = useState("All");
 
@@ -107,7 +107,7 @@ export default function ProblemSelection({ isClose, onClose, onSelectProblem, ro
       }
     }
     checkAuthorization()
-  }, isClose)
+  }, [isClose])
   
   if (loading){
     return <div style={{ color: 'white' }}>Loading</div>;  

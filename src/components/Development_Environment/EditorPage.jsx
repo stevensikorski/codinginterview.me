@@ -6,6 +6,8 @@ import ParticipantsPanel from "./ParticipantsPanel";
 import { AlignJustify, Columns2, ClipboardCheck, Settings } from "lucide-react";
 import ProblemSelection from "./ProblemSelection";
 import ProblemPanel from "./ProblemPanel";
+import { getUser } from "../utilities/auth_context";
+import { io } from "socket.io-client";
 
 export default function DevelopmentEnvironmentPage({roomId, socket}) {
   console.log(socket)
@@ -42,6 +44,7 @@ export default function DevelopmentEnvironmentPage({roomId, socket}) {
     }
     window.addEventListener("mousemove", handleResizing);
     window.addEventListener("mouseup", stopResizing);
+
     return () => {
       window.removeEventListener("mousemove", handleResizing);
       window.removeEventListener("mouseup", stopResizing);
@@ -72,7 +75,7 @@ export default function DevelopmentEnvironmentPage({roomId, socket}) {
         {/*left section*/}
         <section className="flex flex-col justify-between my-2 gap-2 shrink-0 min-w-[400px] max-w-[65%]" style={{ width: `${leftWidth}%` }}>
           {/*pass selected problem to problem panel*/}
-          <ProblemPanel selectedProblem={selectedProblem} />
+          <ProblemPanel selectedProblem={selectedProblem} setSelectedProblem={setSelectedProblem} roomId={roomId} socket={socket}/>
 
           {/*participants*/}
           <ParticipantsPanel isOpen={isParticipantsOpen} toggleOpen={() => setIsParticipantsOpen((prev) => !prev)} />
