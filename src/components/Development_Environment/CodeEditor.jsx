@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import Editor from "@monaco-editor/react";
-import { ChevronDown, Check, Pencil, PencilOff, Play, Save, ListRestart } from "lucide-react";
+import { ChevronDown, Check, Pencil, PencilOff, Play, Save, ListRestart, Palette } from "lucide-react";
 import StarterCode from "./StarterCode";
 import { runCodeWithJudge0 } from "../utilities/judge0";
 
@@ -12,6 +12,7 @@ const languages = [
 
 export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket }) {
   const editorRef = useRef(null);
+  const monacoRef = useRef(null);
 
   const [isOpen, setIsOpen] = useState(false);
   const [language, setLanguage] = useState("python");
@@ -21,6 +22,7 @@ export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket
   const [fontSize, setFontSize] = useState(14);
   const [tabSize, setTabSize] = useState(4);
   const [autoComplete, setAutoComplete] = useState(true);
+  const [currentTheme, setCurrentTheme] = useState("vs-dark");
 
   const fontSizes = [10, 12, 14, 16, 18, 20];
   const tabSizes = [2, 4];
@@ -28,65 +30,63 @@ export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket
   // Timeout function to automatically save and synchronize code
   const debounceTimeout = useRef(null);
 
-  // Check if code is being pushed 
+  // Check if code is being pushed
   const pushCodeStatus = useRef(null);
 
   const pushCodeUpdate = () => {
     // Clear any previous timeout
-    clearTimeout(debounceTimeout.current)
-    if (!pushCodeStatus.current){
+    clearTimeout(debounceTimeout.current);
+    if (!pushCodeStatus.current) {
       // Save copy of code and sychronize it with other users in room
       // whenever user starts typing and then stops typing for 300ms
-      if (editorRef.current){
-        const value = editorRef.current.getValue() || ""
+      if (editorRef.current) {
+        const value = editorRef.current.getValue() || "";
         debounceTimeout.current = setTimeout(() => {
           // SocketIO client object
-          socket.emit("synchronize_code", {roomId, newCode:value})
-        }, 200)
+          socket.emit("synchronize_code", { roomId, newCode: value });
+        }, 200);
       }
     }
-  }
+  };
 
   // Reflect incoming code changes to sychronize code
   useEffect(() => {
-    console.log("useEffect is run")
+    console.log("useEffect is run");
     if (!socket) {
       console.log("Socket is not defined yet");
       return; // Prevent running the effect if socket is not available
     }
 
     const handleSynchronizedCode = (newCode) => {
-      console.log("NEWCODE: ", newCode)
+      console.log("NEWCODE: ", newCode);
       // Code is being received, so do not trigger outgoing code changes until push is done
-      pushCodeStatus.current = true
+      pushCodeStatus.current = true;
 
       // During this time, only accept incoming code changes
       // setCode(newCode)
-      let cursorPosition = null
+      let cursorPosition = null;
       if (editorRef.current) {
-        cursorPosition = editorRef.current.getPosition();  // Get the current cursor position
-        editorRef.current.setValue(newCode);  // Set the new code in the editor
-
+        cursorPosition = editorRef.current.getPosition(); // Get the current cursor position
+        editorRef.current.setValue(newCode); // Set the new code in the editor
       }
-    
+
       // After the content is updated, restore the cursor position
       if (editorRef.current && cursorPosition) {
-        editorRef.current.setPosition(cursorPosition);  // Restore the cursor position
+        editorRef.current.setPosition(cursorPosition); // Restore the cursor position
       }
 
-      // Done 
-      pushCodeStatus.current = false
+      // Done
+      pushCodeStatus.current = false;
 
       // Once code is pushed, the user could have typed more code during this period, so trigger timeout again
       // pushCodeUpdate()
-
-    }
+    };
 
     // Listen for incoming code updates
-    socket.on('synchronize_code', handleSynchronizedCode)
+    socket.on("synchronize_code", handleSynchronizedCode);
     return () => {
-      socket.off('synchronize_code', handleSynchronizedCode)
-    }
+      socket.off("synchronize_code", handleSynchronizedCode);
+    };
   }, []);
 
   const rotateFontSize = () => {
@@ -123,25 +123,28 @@ export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket
     });
   };
 
+  const toggleTheme = () => {
+    const newTheme = currentTheme === "coding-interview-theme" ? "vs-dark" : "coding-interview-theme";
+    setCurrentTheme(newTheme);
+    monacoRef.current?.editor.setTheme(newTheme);
+  };
+
   const handleEditorMount = (editor, monaco) => {
     editorRef.current = editor;
+    monacoRef.current = monaco;
 
-    //custom theme with orange comments
-    monaco.editor.defineTheme('coding-interview-theme', {
-      base: 'vs-dark',
+    monaco.editor.defineTheme("coding-interview-theme", {
+      base: "vs-dark",
       inherit: true,
-      rules: [
-        { token: 'comment', foreground: 'EB5528' } //orange color for comments
-      ],
-      colors: {}
+      rules: [{ token: "comment", foreground: "EB5528" }],
+      colors: {},
     });
-    monaco.editor.setTheme('coding-interview-theme');
+
+    monaco.editor.setTheme(currentTheme);
     editor.onDidChangeCursorPosition((event) => {
-      setPosition({
-        line: event.position.lineNumber,
-        column: event.position.column,
-      });
+      setPosition({ line: event.position.lineNumber, column: event.position.column });
     });
+
     editor.getModel()?.updateOptions({ tabSize });
   };
 
@@ -232,13 +235,12 @@ export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket
           loading=""
           onMount={handleEditorMount}
           onChange={(value) => {
-              console.log("ONCHANGED TRIEGGGERED")
-              pushCodeUpdate();
-              // console.log("Code changed:", value);
-              setCode(value || "");
-              if (isOpen) setIsOpen(false);
-            }
-          }
+            console.log("ONCHANGED TRIEGGGERED");
+            pushCodeUpdate();
+            // console.log("Code changed:", value);
+            setCode(value || "");
+            if (isOpen) setIsOpen(false);
+          }}
           options={{
             automaticLayout: true,
             minimap: { enabled: false },
@@ -271,6 +273,9 @@ export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket
           </button>
           <button onClick={toggleAutoComplete} className="p-0.5 aspect-square text-neutral-600 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200 flex items-center justify-center">
             {autoComplete ? <Pencil className="size-4" /> : <PencilOff className="size-4" />}
+          </button>
+          <button onClick={toggleTheme} className="p-0.5 aspect-square text-neutral-600 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200 flex items-center justify-center">
+            <Palette className="size-4" />
           </button>
         </div>
       </div>
