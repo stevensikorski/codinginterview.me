@@ -89,27 +89,17 @@ app.post('/rooms/:id/problem_selection', async (req, res) => {
 })
 
 // Makes a room for given user, then returns url to unique room
-const generateRoom = async (uid, jwtToken) => {
-    verifyJWTToken(jwtToken)
-
-    // Checks if user has existing room 
-    const dbUser = await getUser(uid) 
-    console.log('dbUser = ' + dbUser)
-    if (dbUser && dbUser.session && dbUser.session.sessionId){
-        console.log("USER ALREADY ASSOCIATED WITH ROOM_ID: ", dbUser.session.sessionId)
-        return null
-    }
-
+const generateRoom = async (uid) => {
     // Updates user's 'session' field in Firebase realtime database
     const sid = uuidv4()
     const updateUserInfo = {
         'session/sessionId': sid, 
-        'updatedAt': getCurrDateTime()
+        'updatedAt': Date.now()
     }
     await updateUser(uid, updateUserInfo)
 
     // Unique room path to be returned to frontend
-    const domainRoot = "http://localhost:3000/"
+    const domainRoot = process.env.REACT_APP_BACKEND_HOST
     const roomPath = `rooms/${sid}/ide`
 
     // Create a new session and insert into Session entity
@@ -118,8 +108,8 @@ const generateRoom = async (uid, jwtToken) => {
         'sessionDuration': 5,
         'sessionCreatorId': uid, 
         'sessionTTL': 5, 
-        'sessionCreationTime': getCurrDateTime(),
-        'sessionURL': domainRoot + roomPath
+        'sessionCreationTime': Date.now(),
+        'sessionURL': (domainRoot + roomPath)
     }
     await updateSession(sid, setSessionInfo)
     return (domainRoot + roomPath)

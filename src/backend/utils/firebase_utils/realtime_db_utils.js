@@ -1,5 +1,5 @@
 // Firebase Realtime Database utility functions
-import { rtdb } from '../../config_files/firebase-admin-config.js'
+import { rtdb, auth } from '../../config_files/firebase-admin-config.js'
 
 // Manipulation of 'User' Entity
 // Fetches a user from database based on uid 
@@ -7,6 +7,8 @@ const getUser = async (uid) => {
     try {
         const userRef = rtdb.ref("users/" + uid)
         const snapShot = await userRef.once('value')
+        if (!snapShot)
+            throw new Error(`User with ${uid} not found in database!`)
         return snapShot.val()
     } catch (error) {
         console.log(error)
@@ -41,13 +43,15 @@ const deleteUser = async (uid) => {
     try {
         const userRef = rtdb.ref("users/" + uid)
         await userRef.remove()
-        console.log("user with uid " + uid + " deleted from realtime database")
+
+        // Also delete from Firebase Authentication
+        await auth.deleteUser(uid)
+
+        console.log("user with uid " + uid + " deleted from realtime database and firebase authentication")
     } catch (error) {
         console.log(error)
     }
 }
-
-
 
 // Manipulation of 'Session' Entity
 // Sets (creates) a new session given sessionId and obj 
@@ -72,16 +76,24 @@ const updateSession = async (sid, obj) => {
     }
 }
 
-// Gets a session based on sessionId 
-const getSession = async (sid, obj) => {
+// Gets a session from Session entity based on sessionId 
+const getSession = async (sid) => {
     try {
         const sessionRef = rtdb.ref("sessions/" + sid)
         const snapShot = await sessionRef.once('value')
+        if (!snapShot)
+            throw new Error(`Session %${sid} not found in database!`)
         return snapShot.val()
     } catch (error) {
         console.log(error)
     }   
 }
 
+// Gets the 'session' field for a user 
+const getUserSession = async (uid) => {
+    const dbUser = await getUser(uid) 
+    return dbUser.session
+}
 
-export { deleteUser, getUser, setUser, updateUser, setSession, updateSession, getSession }
+
+export { deleteUser, getUser, setUser, updateUser, setSession, updateSession, getSession, getUserSession}

@@ -6,27 +6,21 @@ import { deleteUser } from "./realtime_db_utils.js";
 // List all users
 const listAllUsers = async (nextPageToken) => {
     var userRecords = []
+
     // List batch of users, 1000 at a time.
-    await auth
-      .listUsers(1000, nextPageToken)
-      .then(async (listUsersResult) => {
-        const users = listUsersResult.users
-        for (const userRecord of users){
-            // console.log('user', userRecord.toJSON());
-            // Manage each user here
-            userRecords.push(userRecord)
-        }
-        // if (listUsersResult.pageToken) {
-        //   // List next batch of users.
-        // //   await listAllUsers(listUsersResult.pageToken);
-        // }
-      })
-      .catch((error) => {
-        console.log('Error listing users:', error);
-      });
+    const listUsersResult = await auth.listUsers(1000, nextPageToken)
+    const users = listUsersResult.users
+    for (const userRecord of users){
+        // Manage each user here
+        userRecords.push(userRecord)
+    }
+    if (listUsersResult.pageToken) {
+        // List next batch of users.
+        userRecords.push(...(await listAllUsers(listUsersResult.pageToken)))
+    }
     console.log(userRecords)
     return userRecords
-  };
+};
 
 // Deletes user from Firebase Authentication and firebase rtdb
 const deleteAllUsers = async () => {
@@ -47,8 +41,6 @@ const deleteAllUsers = async () => {
         }
     }
 }
-// Invoke below to delete all users
-// deleteAllUsers()
 
 // JWT token creation given a user id (uid)
 const createJWTToken = async (uid) => {

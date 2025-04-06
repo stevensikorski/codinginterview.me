@@ -2,31 +2,34 @@
 import { express, app, server, io, generateRoom } from "./backend/user_sessions/session.js"; // For room creation
 import { registerUserRoutes } from "./backend/user_accounts/account_registration.js"; // For Account registration
 import { getSession } from "./backend/utils/firebase_utils/realtime_db_utils.js";
+import { userHasRoom, getRoomForUser } from "./backend/utils/firebase_utils/room_utils.js";
+import { verifyJWTToken } from "./backend/utils/firebase_utils/auth_utils.js";
 
 // Middleware to parse form data (application/x-www-form-urlencoded)
 app.use("/", express.urlencoded({ extended: true }));
 const port = process.env.BACKEND_PORT;
 
-// Initialize the routes for imported js files
-// registration.js, for user account registration
+// Handles user account registration
 registerUserRoutes(app)
 
 // Listen for socket connection
 io.on('connection', (socket) => {
   console.log("a user has connected")
 
-  // Listen for specific event names (specified by socket-client)
-  // Listen for 'createroom' event
-  socket.on("createroom", (msg) => {
+  // Handles room creation
+  socket.on("createroom", async (msg) => {
     const { uid, jwtToken } = msg
-    const room = generateRoom(uid, jwtToken)
+    
+    // Perform some authorization checks 
+    verifyJWTToken(jwtToken)
+    if (userHasRoom(uid))
+      socket.emit("createroom", `user is already associated with an existing room: ${await getRoomForUser(uid)}`)
+    
 
-    // If roomPath is null, the current user is already associated with a room 
-    if (!room) 
-      socket.emit("messageResponse", "user is already in a room.")
-    else
-    // Otherwise, returns the unique room path to the emitting socket only in the frontend
-      socket.emit("messageResponse", room)
+    // Create a new room and respond back to frontend with the room path
+    const room = await generateRoom(uid)
+    console.log(room)
+    socket.emit("createroom", `user is now bind to room: ${room}`)
   })
 
   // Listen for 'bind_room_user' event, which checks if current user 

@@ -11,25 +11,24 @@ import { getUser, isEmailVerified } from "../utilities/auth_context";
 // socket client
 import io from "socket.io-client";
 
-const startAsInterviewer = async () => {
-  //navigate to problem selection
+const startAsInterviewer = async (socket) => {
+  // Navigate to problem selection
   try {
+    const handleRoomCreation = (roomPath) => {
+      console.log('called')
+      console.log("Room path from backend: ", roomPath);
+      socket.off("createroom")
+    }
+    
+    // Send request to make a room in backend
     const user = await getUser();
-
-    //send request to make a room in backend
     if (user) {
       const jwtToken = await user.getIdToken();
       const uid = user.uid;
-
-      // SocketIO client object
-      const socket = io("http://localhost:3002/", {
-        path: "/createsession",
-      });
-
+      
+      socket.on("createroom", handleRoomCreation)
+      socket.connect()
       socket.emit("createroom", { uid, jwtToken });
-      socket.on("messageResponse", (roomPath) => {
-        console.log("Room path from backend: ", roomPath);
-      });
     }
   } catch (error) {
     console.log(error);
@@ -41,6 +40,12 @@ const startAsInterviewer = async () => {
 // };
 
 export default function AuthenticatedPage() {
+  // SocketIO client object
+  const socket = io(process.env.REACT_APP_BACKEND_HOST, {
+    path: "/createsession",
+    autoConnect: false // Prevents auto connection
+  });
+
   useEffect(() => {
     const checkEmailVerification = async () => {
       const status = await isEmailVerified();
@@ -63,7 +68,7 @@ export default function AuthenticatedPage() {
             <div className="bg-white p-6 rounded-lg shadow-md border border-neutral-200 mb-6">
               <h2 className="text-xl font-bold text-dark mb-3">Create an Interview Session</h2>
               <p className="text-dark-100 mb-4">As an interviewer, you can create a new session and share the invitation link with your interviewee.</p>
-              <button onClick={startAsInterviewer} className="py-3 px-6 rounded-md bg-primary text-light font-bold">
+              <button onClick={() => startAsInterviewer(socket)} className="py-3 px-6 rounded-md bg-primary text-light font-bold">
                 Create Session
               </button>
             </div>
