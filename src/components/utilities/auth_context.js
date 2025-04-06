@@ -40,10 +40,10 @@ const isAuthenticated = async () => {
   if (!user) {
     return false;
   }
-
-  const firebaseToken = await user.getIdToken();
-  if (getLocalToken() === firebaseToken) {
-    return true;
+  
+  const firebaseToken = await user.getIdToken()
+  if (getLocalToken() === firebaseToken){
+    return true
   }
 };
 
@@ -57,4 +57,4 @@ const isEmailVerified = async () => {
   return false;
 };
 
-export { getLocalToken, removeToken, isAuthenticated, getUser, isEmailVerified };
+export { getLocalToken, removeToken, isAuthenticated, getUser, isEmailVerified }

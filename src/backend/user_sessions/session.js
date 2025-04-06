@@ -22,6 +22,9 @@ import cors from "cors"
 // Initialize app object
 const app = express()
 
+// Initialize backend
+app.use(express.json()); 
+
 // CORS configuration
 const corsOptions = {
     origin: 'http://localhost:3000', // Allow only this specific origin
@@ -44,10 +47,7 @@ const io = new Server(server, {
 // Room validation to check for valid room 
 app.get('/rooms/:id/validate', async (req, res) => {
     const roomId = req.params.id; 
-    console.log("Room ID received from frontend: ", roomId)
-
     const session = await getSession(roomId)
-    console.log("session = ", session)
     // Invalid session
     if (!session){
         res.status(400).json({
@@ -63,6 +63,30 @@ app.get('/rooms/:id/validate', async (req, res) => {
         })
     }
 });
+
+// Problem selection validation 
+app.post('/rooms/:id/problem_selection', async (req, res) => {
+    const { uid, roomId } = req.body
+    const session = await getSession(roomId)
+
+    console.log("SESSION = ", session)
+    if (session){
+        if (session.sessionCreatorId === uid){
+            res.status(200).json({
+                success: true, 
+                message: "Success."
+            })
+            console.log("VALID SESSION CREATOR")
+        }
+        else{
+            res.status(400).json({
+                success: false,
+                message: "You do not have sufficient privilege to perform this action."
+            })
+            console.log("INVALID SESSION CREATOR")
+        }
+    }
+})
 
 // Makes a room for given user, then returns url to unique room
 const generateRoom = async (uid, jwtToken) => {

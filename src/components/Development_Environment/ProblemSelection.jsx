@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { X, Search } from "lucide-react";
 
+import { getUser } from "../utilities/auth_context";
 //mock problems data
 const problems = {
   "prob001": {
@@ -68,10 +69,53 @@ const problems = {
   }
 };
 
-export default function ProblemSelection({ onClose, onSelectProblem }) {
+export default function ProblemSelection({ isClose, onClose, onSelectProblem, roomId }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDifficulty, setSelectedDifficulty] = useState("All");
+
+  const [loading, setLoading] = useState(true)
+  const [authorizedUser, setAuthorizedUser] = useState(false)
+
+  //check if user is interviewer 
+  useEffect(() => {
+    const checkAuthorization = async () => {
+      const user = await getUser()
+      if (user){
+        const reqData = {
+          uid: user.uid, 
+          roomId: roomId
+        }
+
+        console.log("calling fetch request")
+        console.log(JSON.stringify(reqData))
+        const response = await fetch(`http://localhost:3002/rooms/${roomId}/problem_selection`,{
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(reqData)
+        })
+
+        const data = await response.json()
+        if (response.ok){
+          setAuthorizedUser(true)
+        }
+        else{
+          console.log(data.message)
+        }
+        setLoading(false)
+      }
+    }
+    checkAuthorization()
+  }, isClose)
   
+  if (loading){
+    return <div style={{ color: 'white' }}>Loading</div>;  
+  }
+
+  if (!authorizedUser){
+    return <div style={{ color: 'white' }}>Problem Selection is for interviewers only</div>;  
+  }
   //filter problems based on search term (matching title OR tags) and difficulty
   const filteredProblems = Object.values(problems).filter(problem => {
     const matchesTitle = problem.title.toLowerCase().includes(searchTerm.toLowerCase());

@@ -121,8 +121,10 @@ export default function DevelopmentEnvironmentPage({roomId, socket}) {
             pointerEvents: showProblemSelection ? "auto" : "none",
           }}>
           <ProblemSelection 
+            isClose={showProblemSelection}
             onClose={() => setShowProblemSelection(false)} 
             onSelectProblem={handleSelectProblem} 
+            roomId={roomId}
           />
         </div>
       </div>
