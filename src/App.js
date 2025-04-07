@@ -4,8 +4,9 @@ import { registerUserRoutes } from "./backend/user_accounts/account_registration
 import { getSession } from "./backend/utils/firebase_utils/realtime_db_utils.js";
 import { userHasRoom, getRoomForUser } from "./backend/utils/firebase_utils/room_utils.js";
 import { verifyJWTToken } from "./backend/utils/firebase_utils/auth_utils.js";
+import dotenv from "dotenv";
 
-require("dotenv").config();
+dotenv.config();
 
 // Middleware to parse form data (application/x-www-form-urlencoded)
 app.use("/", express.urlencoded({ extended: true }));
