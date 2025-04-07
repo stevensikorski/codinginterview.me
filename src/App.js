@@ -95,5 +95,5 @@ io.on('connection', (socket) => {
 
 // Start the server
 server.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on ${process.env.REACT_APP_BACKEND_HOST}`);
 });

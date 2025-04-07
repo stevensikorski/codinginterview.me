@@ -45,7 +45,7 @@ export default function AuthenticatedPage() {
   const linkShownRef = useRef(false);
 
   // SocketIO client object
-  const socket = io(process.env.REACT_APP_BACKEND_HOST || "http://localhost:3002/", {
+  const socket = io(process.env.REACT_APP_BACKEND_HOST, {
     path: "/createsession",
     autoConnect: false // Prevents auto connection
   });

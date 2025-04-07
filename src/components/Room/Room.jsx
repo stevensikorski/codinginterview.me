@@ -13,14 +13,15 @@ function Room() {
   const [isLoading, setIsLoading] = useState(true);
   const [isValidRoom, setIsValidRoom] = useState(false);
 
-  const socket = io('http://localhost:3002/', { 
+  const socket = io(`${process.env.REACT_APP_BACKEND_HOST}`, { 
     path: '/createsession' 
   });
   console.log(socket)
   useEffect(() => {
     const validateCurrentRoom = async () => {
-      const response = await fetch(`http://localhost:3002/rooms/${roomId}/validate`); // Fetch the room data using the ID;
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_HOST}/rooms/${roomId}/validate`); // Fetch the room data using the ID;
       // const data = await response.json()
+      console.log(`${process.env.REACT_APP_BACKEND_HOST}/rooms/${roomId}/validate`)
 
       // HTTP Code 200 (OK)
       if (response.ok) {

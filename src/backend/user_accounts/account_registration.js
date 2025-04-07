@@ -47,11 +47,10 @@ const handleRegistration = async (userCredObj) => {
                     email: registerEmail,
                 }
             },
-            createdAt: getCurrDateTime(),
-            updatedAt: getCurrDateTime()
+            createdAt: Date.now(),
+            updatedAt: Date.now()
         }
-        console.log(userInfo)
-        setUser(uid, userInfo)
+        await setUser(uid, userInfo)
         return registration_status      
     } catch (error) {
         // Firebase error messages
@@ -67,6 +66,7 @@ const registerUserRoutes = (app) => {
     // Route handler for form submission
     app.post('/register', async (req, res) => {
         // Process form and send back response to frontend fetch request
+        console.log("received register")
         let responseData = await handleRegistration(req.body)
         res.json(responseData)
     })

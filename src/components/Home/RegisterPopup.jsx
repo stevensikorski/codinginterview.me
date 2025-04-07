@@ -8,7 +8,8 @@ const handleEmail = async (event) => {
 
   // Form element that invoked the callback funciton
   const form = new FormData(event.target)
-  const endpoint = 'http://localhost:3002/register'
+  const endpoint = `${process.env.REACT_APP_BACKEND_HOST}/register`
+  console.log(`${process.env.REACT_APP_BACKEND_HOST}/register`)
 
   // Fetch API to connect to backend endpoint
   const response = await fetch(endpoint, {
@@ -29,6 +30,7 @@ const handleEmail = async (event) => {
     }
 
     const data = await response.json()
+    console.log(data)
     const auth = getAuth(firebase_client)
     // Check for existence of jwt_token passed by backend for authentication
     if (data.jwt_token){
