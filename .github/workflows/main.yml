@@ -30,7 +30,7 @@ jobs:
 
       - name: Debug Check for Service Account File
         run: |
-          echo "Listing files in $GITHUB_WORKSPACE:"
+          echo "Listing $GITHUB_WORKSPACE:"
           ls -la $GITHUB_WORKSPACE
           echo "Checking file firebase-key.json:"
           ls -la $GITHUB_WORKSPACE/firebase-key.json
@@ -90,7 +90,7 @@ jobs:
 
       - name: Debug Check for Service Account File
         run: |
-          echo "Listing files in $GITHUB_WORKSPACE:"
+          echo "Listing $GITHUB_WORKSPACE:"
           ls -la $GITHUB_WORKSPACE
           echo "Checking file firebase-key.json:"
           ls -la $GITHUB_WORKSPACE/firebase-key.json
