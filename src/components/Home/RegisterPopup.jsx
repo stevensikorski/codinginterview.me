@@ -141,12 +141,12 @@ const RegisterPopup = ({ isOpen, closeModal }) => {
 
               <button
                 type="submit"
-                className="w-full py-3 font-bold bg-primary text-white rounded-lg text-base"
+                className="w-full py-3 font-bold bg-primary text-white rounded-lg text-base hover:bg-primary/90"
               >
                 Register
               </button>
             </form>
-                          <button
+            <button
               onClick={closeModal}
               className="absolute top-3 right-4 cursor-pointer text-gray-600 hover:text-gray-900 text-2xl"
               aria-label="Close"

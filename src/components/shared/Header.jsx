@@ -53,7 +53,7 @@ export default function Header({ openModal }) {
         <div className="max-w-[1300px] mx-auto">
           <div className="flex justify-between items-center">
             {/*logo - links to dashboard if authenticated, home if not */}
-            <a href={homeLink} className="text-2xl font-semibold text-dark">
+            <a href={homeLink} className="text-2xl font-semibold text-dark hover:opacity-80 transition-opacity">
               <img className="size-28 object-contain" src="/logo.webp" alt="logo" />
             </a>
             
@@ -63,7 +63,7 @@ export default function Header({ openModal }) {
               {!isAuthenticated && (
                 <a
                   href={homeLink}
-                  className="text-[13px] text-dark-100 leading-tight font-bold transition-all"
+                  className="text-[13px] text-dark-100 leading-tight font-bold transition-all hover:text-primary"
                 >
                   HOME
                 </a>
@@ -88,7 +88,7 @@ export default function Header({ openModal }) {
               ) : (
                 <button
                   onClick={openModal}
-                  className="px-6 py-2 rounded-md bg-primary text-[15px] font-bold text-light"
+                  className="px-6 py-2 rounded-md bg-primary text-[15px] font-bold text-light hover:bg-primary/90"
                 >
                   Sign in
                 </button>
