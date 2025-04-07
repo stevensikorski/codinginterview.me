@@ -25,12 +25,12 @@ export default function Hero({ openRegisterModal }) {
                 
                 {/*register button - opens signup popup*/}
                 <div className="pt-2">
-                  <button
-                    onClick={openRegisterModal}
-                    className="inline-block px-8 py-2.5 rounded-md bg-primary text-sm font-bold text-light"
-                  >
-                    Give it a try
-                  </button>
+                <button
+                  onClick={openRegisterModal}
+                  className="inline-block px-8 py-2.5 rounded-md bg-primary text-sm font-bold text-light hover:bg-primary/90"
+                >
+                Give it a try
+                </button>
                 </div>
               </div>
             </div>
