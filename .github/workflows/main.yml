@@ -35,6 +35,7 @@ jobs:
           REACT_APP_RAPIDAPI_KEY: ${{ secrets.REACT_APP_RAPIDAPI_KEY }}
           REACT_APP_RAPIDAPI_HOST: ${{ secrets.REACT_APP_RAPIDAPI_HOST }}
           REACT_APP_BACKEND_HOST: ${{ secrets.REACT_APP_BACKEND_HOST }}
+          REACT_APP_FRONTEND_HOST: ${{ secrets.REACT_APP_FRONTEND_HOST }}
           BACKEND_PORT: ${{ secrets.BACKEND_PORT }}
         run: npm run build
 
@@ -73,6 +74,7 @@ jobs:
           REACT_APP_RAPIDAPI_KEY: ${{ secrets.REACT_APP_RAPIDAPI_KEY }}
           REACT_APP_RAPIDAPI_HOST: ${{ secrets.REACT_APP_RAPIDAPI_HOST }}
           REACT_APP_BACKEND_HOST: ${{ secrets.REACT_APP_BACKEND_HOST }}
+          REACT_APP_FRONTEND_HOST: ${{ secrets.REACT_APP_FRONTEND_HOST }}
           BACKEND_PORT: ${{ secrets.BACKEND_PORT }}
         run: npm run build
 
