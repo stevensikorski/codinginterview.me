@@ -1,15 +1,29 @@
 import admin from "firebase-admin";
-import { getAuth } from 'firebase-admin/auth';
+import { getAuth } from "firebase-admin/auth";
+import fs from "fs";
 
-// Get service account 
-const service_account = process.env.GOOGLE_APPLICATION_CREDENTIALS
+// Get the path to the service account file from the environment variable
+const serviceAccountPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 
-// Initialize Firebase
-const firebase_admin = admin.initializeApp({
-  credential: admin.credential.cert(service_account),
-  databaseURL: "https://codinginterview-me-default-rtdb.firebaseio.com"
+if (!serviceAccountPath) {
+  console.error("GOOGLE_APPLICATION_CREDENTIALS environment variable is not set.");
+  process.exit(1);
+}
+
+let serviceAccount;
+try {
+  serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, "utf8"));
+} catch (error) {
+  console.error("Error reading or parsing service account file:", error);
+  process.exit(1);
+}
+
+const firebaseAdmin = admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://codinginterview-me-default-rtdb.firebaseio.com",
 });
 
-const auth = getAuth(firebase_admin)
-const rtdb = firebase_admin.database()
-export { auth, rtdb }
+const auth = getAuth(firebaseAdmin);
+const rtdb = firebaseAdmin.database();
+
+export { auth, rtdb };
