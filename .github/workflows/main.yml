@@ -25,15 +25,16 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Setup Google Authentication
-        run: echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" | base64 --decode > "$GITHUB_WORKSPACE/firebase-key.json"
+      # Decode the base64 secret into a file
+      - name: Setup Firebase Service Account
+        run: echo "${{ secrets.FIREBASE_SERVICE_KEY }}" | base64 --decode > "$GITHUB_WORKSPACE/firebase-key.json"
 
       - name: Debug Check for Service Account File
         run: |
           echo "Listing $GITHUB_WORKSPACE:"
           ls -la $GITHUB_WORKSPACE
-          echo "Checking file firebase-key.json:"
-          ls -la $GITHUB_WORKSPACE/firebase-key.json
+          echo "File size of firebase-key.json:"
+          stat -c%s "$GITHUB_WORKSPACE/firebase-key.json" || stat -f%z "$GITHUB_WORKSPACE/firebase-key.json"
 
       - name: Create .env file
         run: |
@@ -46,6 +47,7 @@ jobs:
 
       - name: Run App Script
         env:
+          FIREBASE_SERVICE_KEY: ${{ secrets.FIREBASE_SERVICE_KEY }}
           GOOGLE_APPLICATION_CREDENTIALS: "$GITHUB_WORKSPACE/firebase-key.json"
         run: node ./src/App.js
 
@@ -85,15 +87,15 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Setup Google Authentication
-        run: echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" | base64 --decode > "$GITHUB_WORKSPACE/firebase-key.json"
+      - name: Setup Firebase Service Account
+        run: echo "${{ secrets.FIREBASE_SERVICE_KEY }}" | base64 --decode > "$GITHUB_WORKSPACE/firebase-key.json"
 
       - name: Debug Check for Service Account File
         run: |
           echo "Listing $GITHUB_WORKSPACE:"
           ls -la $GITHUB_WORKSPACE
-          echo "Checking file firebase-key.json:"
-          ls -la $GITHUB_WORKSPACE/firebase-key.json
+          echo "File size of firebase-key.json:"
+          stat -c%s "$GITHUB_WORKSPACE/firebase-key.json" || stat -f%z "$GITHUB_WORKSPACE/firebase-key.json"
 
       - name: Create .env file
         run: |
@@ -106,6 +108,7 @@ jobs:
 
       - name: Run App Script
         env:
+          FIREBASE_SERVICE_KEY: ${{ secrets.FIREBASE_SERVICE_KEY }}
           GOOGLE_APPLICATION_CREDENTIALS: "$GITHUB_WORKSPACE/firebase-key.json"
         run: node ./src/App.js
 
