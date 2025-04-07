@@ -1,4 +1,5 @@
 import admin from "firebase-admin";
+import { getAuth } from "firebase-admin/auth";
 import fs from "fs";
 
 const keyPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
@@ -8,12 +9,20 @@ if (!keyPath) {
   process.exit(1);
 }
 
-const serviceAccount = JSON.parse(fs.readFileSync(keyPath, "utf8"));
+let serviceAccount;
+try {
+  serviceAccount = JSON.parse(fs.readFileSync(keyPath, "utf8"));
+} catch (error) {
+  console.error("Error reading or parsing service account file:", error);
+  process.exit(1);
+}
 
-admin.initializeApp({
+const firebaseAdmin = admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://your-firebase-project.firebaseio.com",
+  databaseURL: "https://codinginterview-me-default-rtdb.firebaseio.com",
 });
 
-export const auth = admin.auth();
-export const db = admin.database();
+const auth = getAuth(firebaseAdmin);
+const rtdb = firebaseAdmin.database();
+
+export { auth, rtdb };
