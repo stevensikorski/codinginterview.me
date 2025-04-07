@@ -38,7 +38,7 @@ jobs:
           echo "BACKEND_PORT=${{ secrets.BACKEND_PORT }}" >> .env
 
       - name: Run App Script
-        run: node --env-file=./.env ./src/App.js
+        run: node ./src/App.js
 
       - name: Build Main Branch
         env:
@@ -89,7 +89,7 @@ jobs:
           echo "BACKEND_PORT=${{ secrets.BACKEND_PORT }}" >> .env
 
       - name: Run App Script
-        run: node --env-file=./.env ./src/App.js
+        run: node ./src/App.js
 
       - name: Build Dev Branch
         env:
