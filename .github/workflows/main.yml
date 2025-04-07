@@ -28,6 +28,18 @@ jobs:
       - name: Setup Google Authentication
         run: echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" | base64 --decode > "$HOME/firebase-key.json"
 
+      - name: Create .env file
+        run: |
+          echo "REACT_APP_FIREBASE_API_KEY=${{ secrets.REACT_APP_FIREBASE_API_KEY }}" >> .env
+          echo "REACT_APP_RAPIDAPI_KEY=${{ secrets.REACT_APP_RAPIDAPI_KEY }}" >> .env
+          echo "REACT_APP_RAPIDAPI_HOST=${{ secrets.REACT_APP_RAPIDAPI_HOST }}" >> .env
+          echo "REACT_APP_BACKEND_HOST=${{ secrets.REACT_APP_BACKEND_HOST }}" >> .env
+          echo "REACT_APP_FRONTEND_HOST=${{ secrets.REACT_APP_FRONTEND_HOST }}" >> .env
+          echo "BACKEND_PORT=${{ secrets.BACKEND_PORT }}" >> .env
+
+      - name: Run App Script
+        run: node --env-file=./.env ./src/App.js
+
       - name: Build Main Branch
         env:
           CI: false
@@ -66,6 +78,18 @@ jobs:
 
       - name: Setup Google Authentication
         run: echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" | base64 --decode > "$HOME/firebase-key.json"
+
+      - name: Create .env file
+        run: |
+          echo "REACT_APP_FIREBASE_API_KEY=${{ secrets.REACT_APP_FIREBASE_API_KEY }}" >> .env
+          echo "REACT_APP_RAPIDAPI_KEY=${{ secrets.REACT_APP_RAPIDAPI_KEY }}" >> .env
+          echo "REACT_APP_RAPIDAPI_HOST=${{ secrets.REACT_APP_RAPIDAPI_HOST }}" >> .env
+          echo "REACT_APP_BACKEND_HOST=${{ secrets.REACT_APP_BACKEND_HOST }}" >> .env
+          echo "REACT_APP_FRONTEND_HOST=${{ secrets.REACT_APP_FRONTEND_HOST }}" >> .env
+          echo "BACKEND_PORT=${{ secrets.BACKEND_PORT }}" >> .env
+
+      - name: Run App Script
+        run: node --env-file=./.env ./src/App.js
 
       - name: Build Dev Branch
         env:
