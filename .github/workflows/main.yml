@@ -38,6 +38,8 @@ jobs:
           echo "BACKEND_PORT=${{ secrets.BACKEND_PORT }}" >> .env
 
       - name: Run App Script
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: "$HOME/firebase-key.json"
         run: node ./src/App.js
 
       - name: Build Main Branch
@@ -89,6 +91,8 @@ jobs:
           echo "BACKEND_PORT=${{ secrets.BACKEND_PORT }}" >> .env
 
       - name: Run App Script
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: "$HOME/firebase-key.json"
         run: node ./src/App.js
 
       - name: Build Dev Branch
