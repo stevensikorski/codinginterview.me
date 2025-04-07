@@ -92,6 +92,7 @@ const getSession = async (sid) => {
 // Gets the 'session' field for a user 
 const getUserSession = async (uid) => {
     const dbUser = await getUser(uid) 
+    console.log(dbUser)
     return dbUser.session
 }
 

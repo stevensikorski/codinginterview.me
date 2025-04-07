@@ -73,6 +73,18 @@ export default function AuthenticatedPage() {
       });
   };
 
+  const handleLink = (e) => {
+    e.preventDefault();
+    const form = new FormData(e.target)
+    const link = form.get("redirect_link")
+    console.log(link)
+    if (link) {
+      window.open(link, '_blank');
+    } else {
+      alert('Please paste a valid invitation link.');
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col min-w-[1024px]">
       <Header />
@@ -123,10 +135,12 @@ export default function AuthenticatedPage() {
             <div className="bg-white p-6 rounded-lg shadow-md border border-neutral-200">
               <h2 className="text-xl font-bold text-dark mb-3">Join an Interview Session</h2>
               <p className="text-dark-100 mb-4">Paste the invitation link shared by your interviewer to join their session as an interviewee.</p>
-              <div className="flex gap-2">
-                <input type="text" placeholder="Paste invitation link here" className="flex-grow px-4 py-2 border rounded-md" />
-                <button className="px-6 py-2 bg-primary text-light font-bold rounded-md">Join Session</button>
-              </div>
+              <form onSubmit={handleLink}>
+                <div className="flex gap-2">
+                  <input type="text" name="redirect_link" placeholder="Paste invitation link here" className="flex-grow px-4 py-2 border rounded-md" />
+                  <button type="submit" className="px-6 py-2 bg-primary text-light font-bold rounded-md">Join Session</button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
