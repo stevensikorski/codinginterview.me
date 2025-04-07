@@ -26,7 +26,14 @@ jobs:
         run: npm install
 
       - name: Setup Google Authentication
-        run: echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" | base64 --decode > "$HOME/firebase-key.json"
+        run: echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" | base64 --decode > "$GITHUB_WORKSPACE/firebase-key.json"
+
+      - name: Debug Check for Service Account File
+        run: |
+          echo "Listing files in $GITHUB_WORKSPACE:"
+          ls -la $GITHUB_WORKSPACE
+          echo "Checking file firebase-key.json:"
+          ls -la $GITHUB_WORKSPACE/firebase-key.json
 
       - name: Create .env file
         run: |
@@ -39,7 +46,7 @@ jobs:
 
       - name: Run App Script
         env:
-          GOOGLE_APPLICATION_CREDENTIALS: "$HOME/firebase-key.json"
+          GOOGLE_APPLICATION_CREDENTIALS: "$GITHUB_WORKSPACE/firebase-key.json"
         run: node ./src/App.js
 
       - name: Build Main Branch
@@ -55,9 +62,9 @@ jobs:
 
       - name: Deploy to Firebase Main
         env:
-          GOOGLE_APPLICATION_CREDENTIALS: "$HOME/firebase-key.json"
+          GOOGLE_APPLICATION_CREDENTIALS: "$GITHUB_WORKSPACE/firebase-key.json"
         run: |
-          export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-key.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$GITHUB_WORKSPACE/firebase-key.json"
           firebase deploy --only hosting:main
 
   deploy-dev:
@@ -79,7 +86,14 @@ jobs:
         run: npm install
 
       - name: Setup Google Authentication
-        run: echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" | base64 --decode > "$HOME/firebase-key.json"
+        run: echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" | base64 --decode > "$GITHUB_WORKSPACE/firebase-key.json"
+
+      - name: Debug Check for Service Account File
+        run: |
+          echo "Listing files in $GITHUB_WORKSPACE:"
+          ls -la $GITHUB_WORKSPACE
+          echo "Checking file firebase-key.json:"
+          ls -la $GITHUB_WORKSPACE/firebase-key.json
 
       - name: Create .env file
         run: |
@@ -92,7 +106,7 @@ jobs:
 
       - name: Run App Script
         env:
-          GOOGLE_APPLICATION_CREDENTIALS: "$HOME/firebase-key.json"
+          GOOGLE_APPLICATION_CREDENTIALS: "$GITHUB_WORKSPACE/firebase-key.json"
         run: node ./src/App.js
 
       - name: Build Dev Branch
@@ -108,7 +122,7 @@ jobs:
 
       - name: Deploy to Firebase Dev
         env:
-          GOOGLE_APPLICATION_CREDENTIALS: "$HOME/firebase-key.json"
+          GOOGLE_APPLICATION_CREDENTIALS: "$GITHUB_WORKSPACE/firebase-key.json"
         run: |
-          export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-key.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$GITHUB_WORKSPACE/firebase-key.json"
           firebase deploy --only hosting:dev
