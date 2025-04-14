@@ -54,6 +54,8 @@ jobs:
           REACT_APP_BACKEND_HOST: ${{ secrets.REACT_APP_BACKEND_HOST }}
           REACT_APP_FRONTEND_HOST: ${{ secrets.REACT_APP_FRONTEND_HOST }}
           BACKEND_PORT: ${{ secrets.BACKEND_PORT }}
+          FIREBASE_SERVICE_KEY: ${{ secrets.FIREBASE_SERVICE_KEY }}
+          GOOGLE_APPLICATION_CREDENTIALS: "$GITHUB_WORKSPACE/firebase-key.json"
         run: npm run build
 
       - name: Deploy to Firebase Main
@@ -109,6 +111,8 @@ jobs:
           REACT_APP_BACKEND_HOST: ${{ secrets.REACT_APP_BACKEND_HOST }}
           REACT_APP_FRONTEND_HOST: ${{ secrets.REACT_APP_FRONTEND_HOST }}
           BACKEND_PORT: ${{ secrets.BACKEND_PORT }}
+          FIREBASE_SERVICE_KEY: ${{ secrets.FIREBASE_SERVICE_KEY }}
+          GOOGLE_APPLICATION_CREDENTIALS: "$GITHUB_WORKSPACE/firebase-key.json"
         run: npm run build
 
       - name: Deploy to Firebase Dev
