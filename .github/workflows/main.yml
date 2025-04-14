@@ -45,12 +45,6 @@ jobs:
           echo "REACT_APP_FRONTEND_HOST=${{ secrets.REACT_APP_FRONTEND_HOST }}" >> .env
           echo "BACKEND_PORT=${{ secrets.BACKEND_PORT }}" >> .env
 
-      - name: Run App Script
-        env:
-          FIREBASE_SERVICE_KEY: ${{ secrets.FIREBASE_SERVICE_KEY }}
-          GOOGLE_APPLICATION_CREDENTIALS: "$GITHUB_WORKSPACE/firebase-key.json"
-        run: node ./src/App.js
-
       - name: Build Main Branch
         env:
           CI: false
@@ -105,12 +99,6 @@ jobs:
           echo "REACT_APP_BACKEND_HOST=${{ secrets.REACT_APP_BACKEND_HOST }}" >> .env
           echo "REACT_APP_FRONTEND_HOST=${{ secrets.REACT_APP_FRONTEND_HOST }}" >> .env
           echo "BACKEND_PORT=${{ secrets.BACKEND_PORT }}" >> .env
-
-      - name: Run App Script
-        env:
-          FIREBASE_SERVICE_KEY: ${{ secrets.FIREBASE_SERVICE_KEY }}
-          GOOGLE_APPLICATION_CREDENTIALS: "$GITHUB_WORKSPACE/firebase-key.json"
-        run: node ./src/App.js
 
       - name: Build Dev Branch
         env:
