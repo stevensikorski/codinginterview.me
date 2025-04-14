@@ -85,20 +85,18 @@ export default function ParticipantsPanel({ isOpen, toggleOpen }) {
       </div>
 
       {/* Participants Camera */}
-      {isOpen && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-[1px] bg-neutral-800 text-neutral-600 border-t border-neutral-800">
-          {/* Local User */}
-          <div className="relative aspect-video bg-neutral-950 flex flex-col items-center justify-center">
-            {isVideoOn ? <video ref={videoRef} autoPlay className="w-full h-full object-cover" /> : <p className="text-lg font-semibold select-none">Local User</p>}
-            {isMicOn && <audio ref={audioRef} autoPlay className="hidden" />}
-          </div>
-
-          {/* Remote User */}
-          <div className="relative aspect-video bg-neutral-950 flex items-center justify-center">
-            <p className="text-lg font-semibold select-none">Remote User</p>
-          </div>
+      <div className={`grid grid-cols-1 md:grid-cols-2 gap-[1px] bg-neutral-800 text-neutral-600 border-t border-neutral-800 transition-opacity duration-300 ${isOpen ? "" : "opacity-0 pointer-events-none h-0 overflow-hidden"}`}>
+        {/* Local User */}
+        <div className="relative aspect-video bg-neutral-950 flex flex-col items-center justify-center">
+          {isVideoOn ? <video ref={videoRef} autoPlay className="w-full h-full object-cover" /> : <p className="text-lg font-semibold select-none">Local User</p>}
+          {isMicOn && <audio ref={audioRef} autoPlay className="hidden" />}
         </div>
-      )}
+
+        {/* Remote User */}
+        <div className="relative aspect-video bg-neutral-950 flex items-center justify-center">
+          <p className="text-lg font-semibold select-none">Remote User</p>
+        </div>
+      </div>
     </div>
   );
 }
