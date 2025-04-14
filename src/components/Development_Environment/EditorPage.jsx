@@ -9,8 +9,8 @@ import ProblemPanel from "./ProblemPanel";
 import { getUser } from "../utilities/auth_context";
 import { io } from "socket.io-client";
 
-export default function DevelopmentEnvironmentPage({roomId, socket}) {
-  console.log(socket)
+export default function DevelopmentEnvironmentPage({ roomId, socket }) {
+  console.log(socket);
   const [activeTab, setActiveTab] = useState("editor");
   const [isParticipantsOpen, setIsParticipantsOpen] = useState(false);
   const [leftWidth, setLeftWidth] = useState(35);
@@ -19,6 +19,7 @@ export default function DevelopmentEnvironmentPage({roomId, socket}) {
   const [showProblemSelection, setShowProblemSelection] = useState(false);
   //state for selected problem
   const [selectedProblem, setSelectedProblem] = useState(null);
+  const [userName, setUserName] = useState("");
 
   const startResizing = () => setIsResizing(true);
   const stopResizing = () => setIsResizing(false);
@@ -52,6 +53,16 @@ export default function DevelopmentEnvironmentPage({roomId, socket}) {
     };
   });
 
+  useEffect(() => {
+    async function fetchUser() {
+      const user = await getUser();
+      if (user) {
+        setUserName(user.displayName);
+      }
+    }
+    fetchUser();
+  }, []);
+
   return (
     <main className="flex h-screen w-screen bg-neutral-900 overflow-hidden whitespace-nowrap">
       {/*sidebar*/}
@@ -75,10 +86,10 @@ export default function DevelopmentEnvironmentPage({roomId, socket}) {
         {/*left section*/}
         <section className="flex flex-col justify-between my-2 gap-2 shrink-0 min-w-[400px] max-w-[65%]" style={{ width: `${leftWidth}%` }}>
           {/*pass selected problem to problem panel*/}
-          <ProblemPanel selectedProblem={selectedProblem} setSelectedProblem={setSelectedProblem} roomId={roomId} socket={socket}/>
+          <ProblemPanel selectedProblem={selectedProblem} setSelectedProblem={setSelectedProblem} roomId={roomId} socket={socket} />
 
           {/*participants*/}
-          <ParticipantsPanel isOpen={isParticipantsOpen} toggleOpen={() => setIsParticipantsOpen((prev) => !prev)} />
+          <ParticipantsPanel isOpen={isParticipantsOpen} toggleOpen={() => setIsParticipantsOpen((prev) => !prev)} userName={userName} />
         </section>
 
         {/*resizing*/}
@@ -123,12 +134,7 @@ export default function DevelopmentEnvironmentPage({roomId, socket}) {
           style={{
             pointerEvents: showProblemSelection ? "auto" : "none",
           }}>
-          <ProblemSelection 
-            isClose={showProblemSelection}
-            onClose={() => setShowProblemSelection(false)} 
-            onSelectProblem={handleSelectProblem} 
-            roomId={roomId}
-          />
+          <ProblemSelection isClose={showProblemSelection} onClose={() => setShowProblemSelection(false)} onSelectProblem={handleSelectProblem} roomId={roomId} />
         </div>
       </div>
     </main>
