@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Mic, MicOff, Video, VideoOff, ChevronDown } from "lucide-react";
 
-export default function ParticipantsPanel({ isOpen, toggleOpen, userName }) {
+export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket, roomId }) {
+  const [remoteUserName, setRemoteUserName] = useState("");
   const [isMicOn, setIsMicOn] = useState(false);
   const [isVideoOn, setIsVideoOn] = useState(false);
 
@@ -89,12 +90,12 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName }) {
         {/* Local User */}
         <div className="relative aspect-video bg-neutral-950 flex flex-col items-center justify-center">
           {isVideoOn ? <video ref={videoRef} autoPlay className="w-full h-full object-cover" /> : <p className="text-lg font-semibold select-none">{userName ? userName : "You"}</p>}
-          {isMicOn && <audio ref={audioRef} autoPlay className="hidden" />}
+          {/* {isMicOn && <audio ref={audioRef} autoPlay className="hidden" />} */}
         </div>
 
         {/* Remote User */}
         <div className="relative aspect-video bg-neutral-950 flex items-center justify-center">
-          <p className="text-lg font-semibold select-none">Remote User</p>
+          <p className="text-lg font-semibold select-none">{remoteUserName}</p>
         </div>
       </div>
     </div>

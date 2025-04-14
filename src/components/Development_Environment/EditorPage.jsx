@@ -12,7 +12,7 @@ import { io } from "socket.io-client";
 export default function DevelopmentEnvironmentPage({ roomId, socket }) {
   console.log(socket);
   const [activeTab, setActiveTab] = useState("editor");
-  const [isParticipantsOpen, setIsParticipantsOpen] = useState(false);
+  const [isParticipantsOpen, setIsParticipantsOpen] = useState(true);
   const [leftWidth, setLeftWidth] = useState(35);
   const [isResizing, setIsResizing] = useState(false);
   const [codeOutput, setCodeOutput] = useState("");
@@ -89,7 +89,7 @@ export default function DevelopmentEnvironmentPage({ roomId, socket }) {
           <ProblemPanel selectedProblem={selectedProblem} setSelectedProblem={setSelectedProblem} roomId={roomId} socket={socket} />
 
           {/*participants*/}
-          <ParticipantsPanel isOpen={isParticipantsOpen} toggleOpen={() => setIsParticipantsOpen((prev) => !prev)} userName={userName} />
+          <ParticipantsPanel isOpen={isParticipantsOpen} toggleOpen={() => setIsParticipantsOpen((prev) => !prev)} userName={userName} socket={socket} roomId={roomId} />
         </section>
 
         {/*resizing*/}
