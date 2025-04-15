@@ -90,7 +90,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
         {/* Local User */}
         <div className="relative aspect-video bg-neutral-950 flex flex-col items-center justify-center">
           {isVideoOn ? <video ref={videoRef} autoPlay className="w-full h-full object-cover" /> : <p className="text-lg font-semibold select-none">{userName ? userName : "You"}</p>}
-          {/* {isMicOn && <audio ref={audioRef} autoPlay className="hidden" />} */}
+          {isMicOn && <audio ref={audioRef} autoPlay className="hidden" />}
         </div>
 
         {/* Remote User */}
