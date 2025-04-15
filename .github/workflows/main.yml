@@ -40,6 +40,7 @@ jobs:
       - name: Build Project (Main)
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/firebase-key.json
+          CI: false
         run: dotenv npm run build
 
       - name: Deploy to Firebase (Main)
@@ -80,6 +81,7 @@ jobs:
       - name: Build Project (Dev)
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/firebase-key.json
+          CI: false
         run: dotenv npm run build
 
       - name: Deploy to Firebase (Dev)
