@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Mic, MicOff, Video, VideoOff, ChevronDown } from "lucide-react";
+import { Mic, MicOff, Video, VideoOff, ChevronDown, User } from "lucide-react";
 
 export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket, roomId }) {
-  const [remoteUserName, setRemoteUserName] = useState("");
+  const [participants, setParticipants] = useState([]);
   const [isMicOn, setIsMicOn] = useState(false);
   const [isVideoOn, setIsVideoOn] = useState(false);
 
@@ -11,8 +11,104 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
   const videoStreamRef = useRef(null);
   const audioStreamRef = useRef(null);
 
-  const toggleMic = () => setIsMicOn((prev) => !prev);
-  const toggleVideo = () => setIsVideoOn((prev) => !prev);
+  const toggleMic = () => {
+    const newMicState = !isMicOn;
+    setIsMicOn(newMicState);
+    // Emit mic status change to other participants
+    socket.emit("media_state_change", {
+      roomId,
+      userId: socket.id,
+      mediaType: "audio",
+      isOn: newMicState,
+    });
+  };
+
+  const toggleVideo = () => {
+    const newVideoState = !isVideoOn;
+    setIsVideoOn(newVideoState);
+    // Emit video status change to other participants
+    socket.emit("media_state_change", {
+      roomId,
+      userId: socket.id,
+      mediaType: "video",
+      isOn: newVideoState,
+    });
+  };
+
+  // Initialize socket connection and handle user presence
+  useEffect(() => {
+    if (!socket || !roomId) return;
+
+    // Join the room
+    socket.emit("join_room", { roomId, userName });
+
+    // Listen for new participants
+    socket.on("participant_joined", (data) => {
+      setParticipants((prevParticipants) => {
+        // Check if this participant already exists
+        if (prevParticipants.some((p) => p.userId === data.userId)) {
+          return prevParticipants;
+        }
+
+        // Add new participant
+        return [
+          ...prevParticipants,
+          {
+            userId: data.userId,
+            userName: data.userName,
+            isVideoOn: false,
+            isMicOn: false,
+          },
+        ];
+      });
+    });
+
+    // Listen for participant list updates
+    socket.on("participants_list", (participantsList) => {
+      // Make sure we don't have duplicates by using userId as unique identifier
+      const uniqueParticipants = [];
+      const seenUserIds = new Set();
+
+      participantsList.forEach((participant) => {
+        if (!seenUserIds.has(participant.userId)) {
+          seenUserIds.add(participant.userId);
+          uniqueParticipants.push(participant);
+        }
+      });
+
+      setParticipants(uniqueParticipants);
+    });
+
+    // Listen for participant disconnection
+    socket.on("participant_left", (data) => {
+      setParticipants((prevParticipants) => prevParticipants.filter((p) => p.userId !== data.userId));
+    });
+
+    // Listen for media state changes from other participants
+    socket.on("media_state_update", (data) => {
+      setParticipants((prevParticipants) => {
+        return prevParticipants.map((participant) => {
+          if (participant.userId === data.userId) {
+            if (data.mediaType === "audio") {
+              return { ...participant, isMicOn: data.isOn };
+            } else if (data.mediaType === "video") {
+              return { ...participant, isVideoOn: data.isOn };
+            }
+          }
+          return participant;
+        });
+      });
+    });
+
+    // Cleanup on unmount
+    return () => {
+      socket.emit("leave_room", { roomId });
+      socket.off("participant_joined");
+      socket.off("participants_list");
+      socket.off("participant_left");
+      socket.off("media_state_update");
+    };
+  }, [socket, roomId, userName]);
 
   // Local video stream
   useEffect(() => {
@@ -66,12 +162,15 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
     }
   }, [isMicOn]);
 
+  // Get the remote user (if any)
+  const remoteUser = participants.length > 0 ? participants[0] : null;
+
   return (
     <div className="flex flex-none flex-col rounded-lg border shadow bg-editor border-neutral-800 overflow-hidden">
       <div className="flex flex-row justify-between items-center bg-neutral-900">
-        <p className="p-1 px-2 font-semibold text-neutral-600">Participants</p>
+        <p className="p-1 px-2 font-semibold text-neutral-600">Participants {remoteUser ? "(2)" : "(1)"}</p>
 
-        {/* Participants Button */}
+        {/* Media Control Buttons */}
         <div className="flex items-center px-1 gap-1">
           <button className="my-1 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200" onClick={toggleMic}>
             {isMicOn ? <Mic className="p-1 text-neutral-600" /> : <MicOff className="p-1 text-red-500" />}
@@ -89,13 +188,23 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
       <div className={`grid grid-cols-1 md:grid-cols-2 gap-[1px] bg-neutral-800 text-neutral-600 border-t border-neutral-800 transition-opacity duration-300 ${isOpen ? "" : "opacity-0 pointer-events-none h-0 overflow-hidden"}`}>
         {/* Local User */}
         <div className="relative aspect-video bg-neutral-950 flex flex-col items-center justify-center">
-          {isVideoOn ? <video ref={videoRef} autoPlay className="w-full h-full object-cover" /> : <p className="text-lg font-semibold select-none">{userName ? userName : "You"}</p>}
+          {isVideoOn ? <video ref={videoRef} autoPlay muted className="w-full h-full object-cover" /> : <p className="text-lg font-semibold select-none">{userName || "You"}</p>}
           {isMicOn && <audio ref={audioRef} autoPlay className="hidden" />}
         </div>
 
         {/* Remote User */}
         <div className="relative aspect-video bg-neutral-950 flex items-center justify-center">
-          <p className="text-lg font-semibold select-none">{remoteUserName}</p>
+          {remoteUser ? (
+            remoteUser.isVideoOn ? (
+              <div className="w-full h-full bg-neutral-900 flex items-center justify-center">
+                <video id={`video-${remoteUser.userId}`} autoPlay className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <p className="text-lg font-semibold select-none">{remoteUser.userName}</p>
+            )
+          ) : (
+            <User className="size-8 select-none" />
+          )}
         </div>
       </div>
     </div>
