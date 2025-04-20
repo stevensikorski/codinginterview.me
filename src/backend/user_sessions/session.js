@@ -27,7 +27,7 @@ app.use(express.json());
 
 // CORS configuration
 const corsOptions = {
-    origin: 'http://localhost:3000', // Allow only this specific origin
+    origin: [process.env.REACT_APP_FRONTEND_HOST], // Allow only this specific origin
     methods: ['GET', 'POST'],       // Allow these HTTP methods
     allowedHeaders: ['Content-Type', 'Authorization'], // Allow these headers
     credentials: true,               // Allow cookies and credentials
@@ -39,7 +39,7 @@ const server = createServer(app)
 const io = new Server(server, {
     path: "/createsession",
     cors: {
-        origin: "http://localhost:3000",
+        origin: process.env.REACT_APP_FRONTEND_HOST,
         methods: ["GET", "POST"],
     }
 });
@@ -99,7 +99,7 @@ const generateRoom = async (uid) => {
     await updateUser(uid, updateUserInfo)
 
     // Unique room path to be returned to frontend
-    const domainRoot = 'http://localhost:3000/'
+    const domainRoot = process.env.REACT_APP_FRONTEND_HOST
     const roomPath = `rooms/${sid}/ide`
 
     // Create a new session and insert into Session entity
