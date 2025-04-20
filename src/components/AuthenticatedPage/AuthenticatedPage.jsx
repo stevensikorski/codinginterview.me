@@ -85,6 +85,12 @@ export default function AuthenticatedPage() {
     }
   };
 
+  const joinAsInterviewer = () => {
+    if (roomLink) {
+      window.open(roomLink, '_blank');
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col min-w-[1024px]">
       <Header />
@@ -103,30 +109,42 @@ export default function AuthenticatedPage() {
                     linkShownRef.current = false;
                     startAsInterviewer(socket, setShowLinkBox, setRoomLink, linkShownRef);
                   }}
-                  className="py-3 px-6 rounded-md bg-primary text-light font-bold"
+                  className="py-3 px-6 rounded-md bg-primary text-light font-bold hover:bg-primary/90 transition-colors duration-200"
                 >
                   Create Session
                 </button>
               ) : (
                 <div className="mt-4">
                   <p className="font-medium text-dark mb-2">Share this link with your interviewee:</p>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={roomLink}
-                      readOnly
-                      className="flex-grow px-4 py-2 border rounded-md bg-gray-50"
-                    />
-                    <button
-                      onClick={copyToClipboard}
-                      className="px-4 py-2 bg-primary text-light font-bold rounded-md"
-                    >
-                      {copySuccess ? 'Copied!' : 'Copy Link'}
-                    </button>
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={roomLink}
+                        readOnly
+                        className="flex-grow px-4 py-2 border rounded-md bg-gray-50"
+                      />
+                      <button
+                        onClick={copyToClipboard}
+                        className="px-4 py-2 bg-primary text-light font-bold rounded-md hover:bg-primary/90 transition-colors duration-200"
+                      >
+                        {copySuccess ? 'Copied!' : 'Copy Link'}
+                      </button>
+                    </div>
+                    <div className="relative h-5">
+                      {copySuccess && (
+                        <p className="absolute inset-x-0 text-sm text-dark-100">Link copied to clipboard!</p>
+                      )}
+                    </div>
+                    <div className="flex justify-end items-center">
+                      <button
+                        onClick={joinAsInterviewer}
+                        className="px-6 py-2 bg-primary text-light font-bold rounded-md hover:bg-primary/90 transition-colors duration-200"
+                      >
+                        Join as Interviewer
+                      </button>
+                    </div>
                   </div>
-                  {copySuccess && (
-                    <p className="text-sm text-green-600 mt-1">Link copied to clipboard!</p>
-                  )}
                 </div>
               )}
             </div>
@@ -137,8 +155,8 @@ export default function AuthenticatedPage() {
               <p className="text-dark-100 mb-4">Paste the invitation link shared by your interviewer to join their session as an interviewee.</p>
               <form onSubmit={handleLink}>
                 <div className="flex gap-2">
-                  <input type="text" name="redirect_link" placeholder="Paste invitation link here" className="flex-grow px-4 py-2 border rounded-md" />
-                  <button type="submit" className="px-6 py-2 bg-primary text-light font-bold rounded-md">Join Session</button>
+                  <input type="text" name="redirect_link" placeholder="Paste invitation link here" className="flex-grow px-4 py-2 border rounded-md focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200" />
+                  <button type="submit" className="px-6 py-2 bg-primary text-light font-bold rounded-md hover:bg-primary/90 transition-colors duration-200">Join as Interviewee</button>
                 </div>
               </form>
             </div>
@@ -148,4 +166,4 @@ export default function AuthenticatedPage() {
       <Footer />
     </div>
   );
-}
+};
