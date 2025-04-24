@@ -13,15 +13,15 @@ function Room() {
   const [isLoading, setIsLoading] = useState(true);
   const [isValidRoom, setIsValidRoom] = useState(false);
 
-  const socket = io(`${process.env.REACT_APP_BACKEND_HOST}`, { 
-    path: '/createsession' 
+  const socket = io(`${process.env.REACT_APP_BACKEND_HOST}`, {
+    path: "/createsession",
   });
-  console.log(socket)
+  console.log(socket);
   useEffect(() => {
     const validateCurrentRoom = async () => {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_HOST}/rooms/${roomId}/validate`); // Fetch the room data using the ID;
       // const data = await response.json()
-      console.log(`${process.env.REACT_APP_BACKEND_HOST}/rooms/${roomId}/validate`)
+      console.log(`${process.env.REACT_APP_BACKEND_HOST}/rooms/${roomId}/validate`);
 
       // HTTP Code 200 (OK)
       if (response.ok) {
@@ -51,23 +51,21 @@ function Room() {
 
     // Force sequence of function calls since we have asynchronous events
     const runSequence = async () => {
-        await validateCurrentRoom();
-        await bindRoomUser();
-        getRoomUsers()
-    }
-    runSequence()
+      await validateCurrentRoom();
+      await bindRoomUser();
+      getRoomUsers();
+    };
+    runSequence();
 
     return () => {
-      socket.disconnect()
-    }
-  }, [socket]);
+      socket.disconnect();
+    };
+  });
 
   if (isLoading) return <div>Loading...</div>;
 
-  if (!isValidRoom)
-    return <div>Unauthorized</div>;
-  else
-    return <DevelopmentEnvironmentPage roomId={roomId} socket={socket} />;
+  if (!isValidRoom) return <div>Unauthorized</div>;
+  else return <DevelopmentEnvironmentPage roomId={roomId} socket={socket} />;
 }
 
 export default Room;
