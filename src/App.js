@@ -10,7 +10,8 @@ dotenv.config();
 
 // Middleware to parse form data (application/x-www-form-urlencoded)
 app.use("/", express.urlencoded({ extended: true }));
-const port = process.env.BACKEND_PORT;
+const port = process.env.PORT || 3002;
+const host = process.env.IP || "0.0.0.0";
 
 // Handles user account registration
 registerUserRoutes(app);
@@ -202,9 +203,9 @@ io.on("connection", (socket) => {
 });
 
 // Start the server
-server.listen(port, process.env.IP, () => {
-  console.log(port, process.env.IP)
-  const address = server.address() 
-  console.log(address)
+server.listen(port, host, () => {
+  console.log(port, host);
+  const address = server.address();
+  console.log(address);
   console.log(`Server is running on ${process.env.REACT_APP_BACKEND_HOST}`);
 });
