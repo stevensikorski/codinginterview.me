@@ -19,6 +19,7 @@ import DevelopmentEnvironmentPage from "./components/Development_Environment/Edi
 import AuthenticatedPage from "./components/AuthenticatedPage/AuthenticatedPage";
 import Session from "./components/Session/Session.jsx";
 import Room from "./components/Room/Room.jsx";
+import ForgotPasswordPopup from "./components/Home/ForgotPasswordPopup";
 
 // import utility functions and components
 import { ProtectedRoute } from "./components/utilities/ProtectedRoutes.jsx";
@@ -28,11 +29,12 @@ function App() {
   const navigate = useNavigate(); // commented out for deployment to work
 
   //login popup show/hide control
-  var [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   //register popup show/hide control
-  var [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
-
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
+  
   console.log(isLoginModalOpen);
   useEffect(() => {
     if (isLoginModalOpen === true) {
@@ -68,6 +70,15 @@ function App() {
     setIsRegisterModalOpen(false);
   }
 
+  function handleOpenForgotPasswordModal() {
+    setIsLoginModalOpen(false);
+    setIsForgotPasswordModalOpen(true);
+  }
+  
+  function handleCloseForgotPasswordModal() {
+    setIsForgotPasswordModalOpen(false);
+  }
+
   return (
     <div className="min-w-[1024px]">
       <Header openModal={handleOpenLoginButtonClick} />
@@ -78,8 +89,17 @@ function App() {
         <FindPartner />
         <SolveProblem />
         {/*popups, only show when their state is true*/}
-        <LoginModal isOpen={isLoginModalOpen} closeModal={handleCloseLoginModal} />
+        <LoginModal 
+          isOpen={isLoginModalOpen} 
+          closeModal={handleCloseLoginModal} 
+          openForgotPasswordModal={handleOpenForgotPasswordModal}
+        />
         <RegisterPopup isOpen={isRegisterModalOpen} closeModal={handleCloseRegisterModal} />
+        <ForgotPasswordPopup 
+          isOpen={isForgotPasswordModalOpen} 
+          closeModal={handleCloseForgotPasswordModal}
+          openLoginModal={handleOpenLoginButtonClick} 
+        />
       </main>
       {/*bot section*/}
       <Footer />
