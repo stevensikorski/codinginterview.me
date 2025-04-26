@@ -27,9 +27,9 @@ export default function Hero({ openRegisterModal }) {
                 <div className="pt-2">
                 <button
                   onClick={openRegisterModal}
-                  className="inline-block px-8 py-2.5 rounded-md bg-primary text-sm font-bold text-light hover:bg-primary/90"
+                  className="inline-block px-9 py-3.5 rounded-md bg-primary text-[18px] font-bold text-light hover:bg-primary/90"
                 >
-                Give it a try
+                Give it a try!
                 </button>
                 </div>
               </div>
