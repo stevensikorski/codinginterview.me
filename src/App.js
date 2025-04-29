@@ -89,6 +89,20 @@ io.on("connection", (socket) => {
     socket.broadcast.to(roomId).emit("problem_panel_synchronization", problem);
   });
 
+  // WebRTC: Send offer to a peer
+  // WebRTC signaling for offer/answer/candidate
+  socket.on("webrtc_offer", ({ roomId, offer }) => {
+    socket.to(roomId).emit("webrtc_offer", { offer, from: socket.id });
+  });
+
+  socket.on("webrtc_answer", ({ roomId, answer }) => {
+    socket.to(roomId).emit("webrtc_answer", { answer, from: socket.id });
+  });
+
+  socket.on("webrtc_ice_candidate", ({ roomId, candidate }) => {
+    socket.to(roomId).emit("webrtc_ice_candidate", { candidate, from: socket.id });
+  });
+
   // User joins a room
   socket.on("join_room", (data) => {
     const { roomId, userName } = data;
