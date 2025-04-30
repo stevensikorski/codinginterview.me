@@ -10,7 +10,8 @@ dotenv.config();
 
 // Middleware to parse form data (application/x-www-form-urlencoded)
 app.use("/", express.urlencoded({ extended: true }));
-const port = process.env.BACKEND_PORT;
+const port = process.env.PORT || 3002;
+const host = process.env.IP || "0.0.0.0";
 
 // Handles user account registration
 registerUserRoutes(app);
@@ -92,6 +93,20 @@ io.on("connection", (socket) => {
     const { roomId, problem } = msg;
     // Broadcast the updated code to all other users in the same room
     socket.broadcast.to(roomId).emit("problem_panel_synchronization", problem);
+  });
+
+  // WebRTC: Send offer to a peer
+  // WebRTC signaling for offer/answer/candidate
+  socket.on("webrtc_offer", ({ roomId, offer }) => {
+    socket.to(roomId).emit("webrtc_offer", { offer, from: socket.id });
+  });
+
+  socket.on("webrtc_answer", ({ roomId, answer }) => {
+    socket.to(roomId).emit("webrtc_answer", { answer, from: socket.id });
+  });
+
+  socket.on("webrtc_ice_candidate", ({ roomId, candidate }) => {
+    socket.to(roomId).emit("webrtc_ice_candidate", { candidate, from: socket.id });
   });
 
   // User joins a room
@@ -232,9 +247,9 @@ io.on("connection", (socket) => {
 });
 
 // Start the server
-server.listen(port, process.env.IP, () => {
-  console.log(port, process.env.IP)
-  const address = server.address() 
-  console.log(address)
+server.listen(port, host, () => {
+  console.log(port, host);
+  const address = server.address();
+  console.log(address);
   console.log(`Server is running on ${process.env.REACT_APP_BACKEND_HOST}`);
 });

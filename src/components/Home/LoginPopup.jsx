@@ -19,7 +19,7 @@ const handleLogin = async (event) => {
       })
 }
 
-const LoginModal = ({ isOpen, closeModal }) => {
+const LoginModal = ({ isOpen, closeModal, openForgotPasswordModal }) => {
   return (
     <>
       {isOpen && (
@@ -64,6 +64,7 @@ const LoginModal = ({ isOpen, closeModal }) => {
               <div className="mb-6 text-right">
                 <button
                   type="button"
+                  onClick={openForgotPasswordModal}
                   className="text-sm text-primary hover:underline"
                 >
                   Forgot password?
