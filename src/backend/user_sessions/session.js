@@ -69,21 +69,18 @@ app.post('/rooms/:id/problem_selection', async (req, res) => {
     const { uid, roomId } = req.body
     const session = await getSession(roomId)
 
-    console.log("SESSION = ", session)
     if (session){
         if (session.sessionCreatorId === uid){
             res.status(200).json({
                 success: true, 
                 message: "Success."
             })
-            console.log("VALID SESSION CREATOR")
         }
         else{
             res.status(400).json({
                 success: false,
                 message: "You do not have sufficient privilege to perform this action."
             })
-            console.log("INVALID SESSION CREATOR")
         }
     }
 })

@@ -51,14 +51,12 @@ export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket
 
   // Reflect incoming code changes to sychronize code
   useEffect(() => {
-    console.log("useEffect is run");
     if (!socket) {
       console.log("Socket is not defined yet");
       return; // Prevent running the effect if socket is not available
     }
 
     const handleSynchronizedCode = (newCode) => {
-      console.log("NEWCODE: ", newCode);
       // Code is being received, so do not trigger outgoing code changes until push is done
       pushCodeStatus.current = true;
 

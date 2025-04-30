@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 //React router allows routing to different paths (eg: for redirects)
 // import { BrowserRouter as Router, Route, Routes, useNavigate } from "react-router-dom"; // commented out for deployment to work
@@ -22,8 +22,24 @@ import Room from "./components/Room/Room.jsx";
 
 // import utility functions and components
 import { ProtectedRoute } from "./components/utilities/ProtectedRoutes.jsx";
-
+import { io } from "socket.io-client";
 function App() {
+  useEffect(() => {
+    const sock = io(`${process.env.REACT_APP_BACKEND_HOST}`, { 
+      path: '/createsession'
+    })
+    
+    sock.on("bind_room_user", () => console.log("DO NOT LOG THIS"))
+    sock.on("connect", () => {
+      sock.emit("bind_room_user", {'roomId': "tester1234"})
+    })
+    return () => {
+      sock.off("bind_room_user");
+      sock.disconnect();
+    }
+  }, [])
+
+
   //routing capabilities
   const navigate = useNavigate(); // commented out for deployment to work
 

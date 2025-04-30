@@ -25,8 +25,6 @@ export default function ProblemPanel({ selectedProblem, setSelectedProblem, room
     };
 
     const syncProblemPanel = () => {
-      console.log(selectedProblem);
-      console.log("syncing problem at frontend");
       socket.on("problem_panel_synchronization", handleProblemPanelSync);
       socket.emit("problem_panel_synchronization", { roomId, problem: selectedProblem });
     };

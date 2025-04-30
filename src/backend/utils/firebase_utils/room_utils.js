@@ -11,7 +11,7 @@ const userHasRoom = async (uid) => {
 // Gets the room URL of current user (must be valid room)
 const getRoomForUser = async (uid) => {
     const roomId = (await getUserSession(uid)).sessionId
-    const room = `http://localhost:3000/rooms/${roomId}/ide`
+    const room = `${process.env.REACT_APP_FRONTEND_HOST}/rooms/${roomId}/ide`
     return room
 }
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { getUser } from "../utilities/auth_context";
 import { io } from "socket.io-client";
@@ -6,23 +6,28 @@ import { io } from "socket.io-client";
 // Components
 import DevelopmentEnvironmentPage from "../Development_Environment/EditorPage";
 
+// This component represents a room in which participants join
+// All sockets are initialized here and disconnected here
 function Room() {
   // Get the room ID from the URL
   const { roomId } = useParams();
-
   const [isLoading, setIsLoading] = useState(true);
   const [isValidRoom, setIsValidRoom] = useState(false);
+  const [isSocketConnected, setIsSocketConnected] = useState(false);
 
-  const socket = io(`${process.env.REACT_APP_BACKEND_HOST}`, { 
-    path: '/createsession' 
-  });
-  console.log(socket)
+  const socketRef = useRef(null);
   useEffect(() => {
-    const validateCurrentRoom = async () => {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_HOST}/rooms/${roomId}/validate`); // Fetch the room data using the ID;
-      // const data = await response.json()
-      console.log(`${process.env.REACT_APP_BACKEND_HOST}/rooms/${roomId}/validate`)
+    if (!socketRef.current) {
+      socketRef.current = io(`${process.env.REACT_APP_BACKEND_HOST}`, { 
+        path: '/createsession'      
+      })
+    } 
 
+    // Event handlers
+    const validateCurrentRoom = async () => {
+      // Fetch the room data using the ID;
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_HOST}/rooms/${roomId}/validate`); 
+      console.log(response)
       // HTTP Code 200 (OK)
       if (response.ok) {
         // Room is valid
@@ -30,44 +35,61 @@ function Room() {
       } else {
         // Room is valid
       }
-      setIsLoading(false);
     };
 
     // For user validation in room, use socket
+    const handleBindRoomUsers = (message) => {
+      if (message.status === 'Success'){
+        console.log('Room successfully bound to user')
+        socketRef.current.emit("get_room_users", { 'roomId':roomId });
+      }
+      else{
+        console.log('Room failed to bound to user')
+      }
+    }
+
+    const handleGetRoomUsers = (response) => {
+      console.log(`Users in room ${roomId}: ${response}`);
+      setIsLoading(false);
+    }
+
     const bindRoomUser = async () => {
       const user = await getUser();
       const uid = user.uid;
 
-      socket.emit("bind_room_user", { uid, roomId });
+      // Make sure binding comes before fetching room users
+      socketRef.current.emit("bind_room_user", { 'uid':uid, 'roomId':roomId });
     };
 
-    // Get all users in room
-    const getRoomUsers = () => {
-      socket.on("get_room_users", (response) => {
-        console.log(`Users in room ${roomId}: ${response}`);
-      });
-      socket.emit("get_room_users", { roomId });
-    };
-
-    // Force sequence of function calls since we have asynchronous events
-    const runSequence = async () => {
-        await validateCurrentRoom();
-        await bindRoomUser();
-        getRoomUsers()
-    }
-    runSequence()
+    // Event listeners
+    socketRef.current.on("bind_room_user", handleBindRoomUsers)
+    socketRef.current.on("get_room_users", handleGetRoomUsers)
+    socketRef.current.on("connect", async () => {
+      console.log("socket connected")
+      setIsSocketConnected(true)
+      await validateCurrentRoom();
+      await bindRoomUser();
+    })
+    socketRef.current.on("disconnect", () => {
+      console.log("socket disconnected")
+      setIsSocketConnected(false)
+    })
 
     return () => {
-      socket.disconnect()
+      socketRef.current.removeAllListeners();
+      socketRef.current.disconnect();
+      socketRef.current = null
+      console.log("cleaned")
     }
-  }, [socket]);
+  }, []);
+
 
   if (isLoading) return <div>Loading...</div>;
 
   if (!isValidRoom)
     return <div>Unauthorized</div>;
   else
-    return <DevelopmentEnvironmentPage roomId={roomId} socket={socket} />;
+    return <DevelopmentEnvironmentPage roomId={roomId} socket={socketRef.current} socketState={isSocketConnected}/>;
 }
 
 export default Room;

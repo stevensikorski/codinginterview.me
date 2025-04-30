@@ -7,10 +7,8 @@ import { AlignJustify, Columns2, ClipboardCheck, Settings } from "lucide-react";
 import ProblemSelection from "./ProblemSelection";
 import ProblemPanel from "./ProblemPanel";
 import { getUser } from "../utilities/auth_context";
-import { io } from "socket.io-client";
 
-export default function DevelopmentEnvironmentPage({ roomId, socket }) {
-  console.log(socket);
+export default function DevelopmentEnvironmentPage({ roomId, socket, socketState }) {
   const [activeTab, setActiveTab] = useState("editor");
   const [isParticipantsOpen, setIsParticipantsOpen] = useState(true);
   const [leftWidth, setLeftWidth] = useState(35);
@@ -89,7 +87,7 @@ export default function DevelopmentEnvironmentPage({ roomId, socket }) {
           <ProblemPanel selectedProblem={selectedProblem} setSelectedProblem={setSelectedProblem} roomId={roomId} socket={socket} />
 
           {/*participants*/}
-          <ParticipantsPanel isOpen={isParticipantsOpen} toggleOpen={() => setIsParticipantsOpen((prev) => !prev)} userName={userName} socket={socket} roomId={roomId} />
+          <ParticipantsPanel isOpen={isParticipantsOpen} toggleOpen={() => setIsParticipantsOpen((prev) => !prev)} userName={userName} socket={socket} socketState={socketState} roomId={roomId} />
         </section>
 
         {/*resizing*/}

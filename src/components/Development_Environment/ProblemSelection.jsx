@@ -86,8 +86,6 @@ export default function ProblemSelection({ isClose, onClose, onSelectProblem, ro
           roomId: roomId
         }
 
-        console.log("calling fetch request")
-        console.log(JSON.stringify(reqData))
         const response = await fetch(`${process.env.REACT_APP_BACKEND_HOST}/rooms/${roomId}/problem_selection`,{
           method: 'POST',
           headers: {
