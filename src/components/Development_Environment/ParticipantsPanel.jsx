@@ -8,10 +8,10 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
 
   const videoRef = useRef(null);
   const audioRef = useRef(null);
+
+  const remoteVidRef = useRef(null);
+
   const audioStreamRef = useRef(null);
-  const videoStreamRef = useRef(null);
-  const remoteStreamsRef = useRef({});
-  const streamMappingRef = useRef({});
 
   const peerConnectionLocalRef = useRef(null);
   const peerConnectionRemoteRef = useRef(null);
@@ -92,32 +92,8 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
       console.error("No stream in track event!");
       return;
     }
-    
-    // Process all participants
-    participants.forEach(participant => {
-      console.log(`Processing participant: ${participant.userId} (${participant.userName})`);
-      
-      // Skip our own ID
-      if (participant.userId === socket.id) {
-        console.log(`Skipping self: ${participant.userId}`);
-        return;
-      }
-      
-      // Store stream for this participant
-      console.log(`Storing stream for ${participant.userId}`);
-      remoteStreamsRef.current[participant.userId] = remoteStream;
-      
-      // Try to find the video element immediately
-      const videoEl = document.getElementById(`video-${participant.userId}`);
-      console.log(`Looking for video element ID: video-${participant.userId}`);
-      console.log(`Found element:`, !!videoEl);
-      
-      if (videoEl) {
-        console.log(`Setting stream for element video-${participant.userId}`);
-        videoEl.srcObject = remoteStream;
-        videoEl.play().catch(e => console.error(`Error playing video: ${e.message}`));
-      }
-    });
+
+    remoteVidRef.current.srcObject = remoteStream;
   };
 
   // Handle user presence
@@ -198,6 +174,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
                 if (peerConnectionRemoteRef.current){
                   peerConnectionRemoteRef.current.removeEventListener("icecandidate", handleIceRemotePeer)
                   peerConnectionRemoteRef.current.removeEventListener('track', trackHandler)
+                  peerConnectionRemoteRef.current.close();
                   peerConnectionRemoteRef.current = null;
                 }
               }
@@ -326,25 +303,29 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
     if (isVideoOn) {
       console.log("video is on")
       navigator.mediaDevices
-        .getUserMedia({ video: true, audio: isMicOn })
+        .getUserMedia({ video: true })
         .then((stream) => {
           //store the stream reference for cleanup
-          videoStreamRef.current = stream;
-          
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream;
+          videoRef.current.srcObject = stream
+
+          if (participants.length)
             localPeerAction()
-          }
         })
     } else {
       //video stream cleanup
-      if (videoStreamRef.current) {
-        videoStreamRef.current.getTracks().forEach((track) => track.stop());
-        videoStreamRef.current = null;
-      }
-      
       if (videoRef.current) {
+        videoRef.current.getTracks().forEach((track) => {
+          console.log("track: ")
+          console.log(track)
+          track.stop()
+        });
         videoRef.current.srcObject = null;
+      }
+
+      // Terminate local peer-to-peer connection if it had one 
+      if (peerConnectionLocalRef.current){
+        peerConnectionLocalRef.current.close();
+        peerConnectionLocalRef.current = null;
       }
     }
 
@@ -364,6 +345,13 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
     socket.on("incoming-candidates", handleIncomingCandidates)
 
     return () => {
+      //clean up stored streams when component unmounts
+      // Object.values(remoteStreamsRef.current).forEach(stream => {
+      //   if (stream && stream.getTracks) {
+      //     stream.getTracks().forEach(track => track.stop());
+      //   }
+      // });
+      // remoteStreamsRef.current = {};
       socket.off("incoming-candidates")
     }
   }, [])
@@ -395,18 +383,6 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
       }
     }
   }, [isMicOn]);
-
-  useEffect(() => {
-    return () => {
-      //clean up stored streams when component unmounts
-      Object.values(remoteStreamsRef.current).forEach(stream => {
-        if (stream && stream.getTracks) {
-          stream.getTracks().forEach(track => track.stop());
-        }
-      });
-      remoteStreamsRef.current = {};
-    };
-  }, []);
 
   // Get the remote user (if any)
   const remoteUser = participants.length > 0 ? participants[0] : null;
@@ -461,16 +437,10 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
               <div className="w-full h-full bg-neutral-900 flex items-center justify-center">
                 <video
                   id={`video-${remoteUser.userId}`}
+                  ref={remoteVidRef}
                   autoPlay
                   playsInline
-                  ref={el => {
-                    if (el) {
-                      //direct check the ref for stored streams
-                      if (remoteStreamsRef.current[remoteUser.userId]) {
-                        el.srcObject = remoteStreamsRef.current[remoteUser.userId];
-                      }
-                    }
-                  }}
+                  muted
                   className="w-full h-full object-cover"
                 />
               </div>
