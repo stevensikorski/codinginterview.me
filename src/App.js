@@ -136,6 +136,13 @@ io.on("connection", (socket) => {
     console.log(`User ${socket.userData.userName} joined room ${roomId}`);
   });
 
+  // Checks if remote peer is ready for peer connection
+  socket.on("peer_ready", (data) => {
+    console.log("peer message received")
+    const { roomId, ready } = data; 
+    socket.to(roomId).emit("peer_ready", { ready });
+  })
+
   // User leaves a room
   socket.on("leave_room", async (data) => {
     console.log("received request to leave room")
@@ -157,7 +164,7 @@ io.on("connection", (socket) => {
 
   // Media state change (video/audio toggle)
   socket.on("media_state_change", (data) => {
-    console.log("media state change request received")
+    console.log("media state change request received by user " + data.userName + " at location: " + data.loc)
     const { roomId, mediaType, isOn } = data;
 
     // Update socket user data
@@ -192,7 +199,6 @@ io.on("connection", (socket) => {
     }
     // For ice candidates
     else if (data.candidates){
-      console.log("ICE candidates received: ")
       socket.to(data.roomId).emit("incoming-candidates", { 'candidates': data.candidates, 'currentUserRole': data.currentUserRole})
     }
     // For closing peer connection

@@ -6,11 +6,12 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
   const [isMicOn, setIsMicOn] = useState(false);
   const [isVideoOn, setIsVideoOn] = useState(false);
 
+  const lastVideoStateRef = useRef(false); // store the last known state
+
   const videoRef = useRef(null);
   const audioRef = useRef(null);
 
   const remoteVidRef = useRef(null);
-
   const audioStreamRef = useRef(null);
 
   const peerConnectionLocalRef = useRef(null);
@@ -37,7 +38,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
       roomId,
       userId: socket.id,
       mediaType: "audio",
-      isOn: newMicState,
+      isOn: newMicState
     });
   };
 
@@ -45,13 +46,15 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
     console.log("VIDEO IS TOGGLED");
     const newVideoState = !isVideoOn;
     setIsVideoOn(newVideoState);
+
+    lastVideoStateRef.current = isVideoOn;
     // Emit video status change to other participants
-    socket.emit("media_state_change", {
-      roomId,
-      userId: socket.id,
-      mediaType: "video",
-      isOn: newVideoState,
-    });
+    // socket.emit("media_state_change", {
+    //   roomId,
+    //   userId: socket.id,
+    //   mediaType: "video",
+    //   isOn: newVideoState
+    // });
   };
 
   // Listen for ICE candidates on a RTCPeerConnection (can be used by both peers)
@@ -86,6 +89,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
     }
   }
 
+  // Keeps track of remote streams
   const trackHandler = async (event) => {
     const remoteStream = event.streams[0];
     if (!remoteStream) {
@@ -96,6 +100,76 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
     remoteVidRef.current.srcObject = remoteStream;
   };
 
+  // Resets peer connection based on role
+  const resetPeer = (role) => {
+    if (role === 'local'){
+      if (peerConnectionLocalRef.current) {
+        peerConnectionLocalRef.current.removeEventListener("icecandidate", handleIceLocalPeer);
+        peerConnectionLocalRef.current.removeEventListener("connectionstatechange", connectionHandler);
+        peerConnectionLocalRef.current.close();
+        peerConnectionLocalRef.current = null;
+      }
+    }
+    else {
+      if (peerConnectionRemoteRef.current) {
+        peerConnectionRemoteRef.current.removeEventListener("icecandidate", handleIceRemotePeer)
+        peerConnectionRemoteRef.current.removeEventListener('track', trackHandler)
+        peerConnectionRemoteRef.current.close();
+        peerConnectionRemoteRef.current = null;
+      }
+    }
+  }
+
+  // Named event handler to handle forwarding local ICE candidates to signaling server
+  const handleIceLocalPeer = (event) => {
+    sendIceCandidates(event, "localPeer")
+  }
+  // Named event handler to detect connection state of local peer to remote peer
+  const connectionHandler = (event) => {
+    console.log("current peer connection status: ", peerConnectionLocalRef.current.connectionState)
+    if (peerConnectionLocalRef.current.connectionState == 'connected'){
+      // Peers are now connected 
+      console.log("peers connected!")
+    }
+  }
+  // Procedures of the local peer to initialize a peer connection with remote peer
+  const localPeerAction = () => {
+    // Add local media tracks (video in this case)
+    videoRef.current.srcObject.getTracks().forEach(track => {
+      console.log("track: ")
+      console.log(track)
+      peerConnectionLocalRef.current.addTrack(track, videoRef.current.srcObject)
+    })
+
+    // Wait for WebRTC to retrieve local ICE candidates and send them to other peer
+    peerConnectionLocalRef.current.addEventListener("icecandidate", handleIceLocalPeer)
+
+    // Listen for answer to offer by the other peer
+    socket.on("incoming-answer", message => {
+      console.log("incoming answer received in frontend")
+      console.log(message.answer)
+      if (message.answer){
+        let remoteDesc = new RTCSessionDescription(message.answer)
+        peerConnectionLocalRef.current.setRemoteDescription(remoteDesc)
+          .then(() => {
+            console.log("answer received IN FRONTEND")
+          })
+      }
+    })
+
+    // Create an offer and send it to the other peer
+    peerConnectionLocalRef.current.createOffer()
+      .then((offer) => {
+        peerConnectionLocalRef.current.setLocalDescription(offer)
+          .then(() => {
+            socket.emit("signal", { offer, roomId})
+          })
+      })
+
+    // Check if connection between peers is established 
+    peerConnectionLocalRef.current.addEventListener('connectionstatechange', connectionHandler);
+  }
+
   // Handle user presence
   useEffect(() => {
     if (!socket || !roomId || !userName) return;
@@ -104,9 +178,11 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
     socket.on("participant_joined", (data) => {
       console.log("new participant: ", data)
       console.log(data.userName)
+
       setParticipants((prevParticipants) => {
         // Check if this participant already exists
         if (prevParticipants.some((p) => p.userId === data.userId)) {
+          console.log("OTHER PARTICIPANT ALREADY EXISTS")
           return prevParticipants;
         }
 
@@ -146,15 +222,17 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
     socket.on("participant_left", (data) => {
       console.log("participant has left")
       console.log(data)
+      
+      resetPeer('local');
+      resetPeer('remote');
       setParticipants((prevParticipants) => prevParticipants.filter((p) => p.userId !== data.userId));
     });
 
-    console.log("Registering media_state_update listener");
     // Listen for media state changes from other participants
     socket.on("media_state_update", (data) => {
       console.log("FRONTEND MEDIA STATE UPDATE")
 
-      // React Strict Mode calls invokes updater function twice, so be careful
+      // React Strict Mode calls invokes updater function twice
       setParticipants((prevParticipants) => {
         return prevParticipants.map((participant) => {
           if (participant.userId === data.userId) {
@@ -165,17 +243,15 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
               console.log(data);
               // If enabled, current participant will serve as the 'remote peer' and get ready for peer connection
               if (data.isOn){
-                if (!peerConnectionRemoteRef.current)
+                if (!peerConnectionRemoteRef.current){
                   peerConnectionRemoteRef.current = new RTCPeerConnection(configuration);
+                  socket.emit("peer_ready", {"ready": true, "roomId": roomId})
+                }
               }
               // If disabled, reset peer connection
-              else{
-                console.log(peerConnectionRemoteRef.current)
+              else {
                 if (peerConnectionRemoteRef.current){
-                  peerConnectionRemoteRef.current.removeEventListener("icecandidate", handleIceRemotePeer)
-                  peerConnectionRemoteRef.current.removeEventListener('track', trackHandler)
-                  peerConnectionRemoteRef.current.close();
-                  peerConnectionRemoteRef.current = null;
+                  resetPeer('remote')
                 }
               }
               return { ...participant, isVideoOn: data.isOn };
@@ -190,6 +266,15 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
     // So, let the browser notify the backend about the disconnection and let it notify other users
     // https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event
     const handleUnload = () => {
+      if (peerConnectionLocalRef.current){
+        peerConnectionLocalRef.current.close();
+        peerConnectionLocalRef.current = null;
+      }
+
+      if (peerConnectionRemoteRef.current){
+        peerConnectionRemoteRef.current.close(); 
+        peerConnectionLocalRef.current = null;
+      }
       socket.emit("leave_room", { roomId })
     }
     window.addEventListener("beforeunload", handleUnload)
@@ -207,8 +292,9 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
   }, [userName, socket, roomId]);
 
   // Remote peer connection handshake 
+  // This runs when peerConnectionRemoteRef changes (based on media state change of the other peer)
   useEffect(() => {
-    if (!peerConnectionRemoteRef.current) return; 
+    if (!peerConnectionRemoteRef.current || !socket) return; 
     peerConnectionRemoteRef.current.addEventListener("icecandidate", handleIceRemotePeer)
     peerConnectionRemoteRef.current.ontrack = trackHandler;
 
@@ -243,87 +329,110 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
     return () => {
       socket.off("incoming-offer");
     }
-  }, [peerConnectionRemoteRef.current, participants, socket]); // Added participants dependency to ensure trackHandler has latest participants
+  }, [peerConnectionRemoteRef.current, socket]); 
 
    // Local peer connection handshake
+   // This runs whenever the local user toggles their own video
    useEffect(() => {
     console.log("NONEMPTY USEEFFECT")
-    if (!isVideoOn) return;
-    peerConnectionLocalRef.current = new RTCPeerConnection(configuration);
-    peerConnectionLocalRef.current.ontrack = trackHandler;
-
-    // Local Peer Reference
-    const handleIceLocalPeer = (event) => {
-      sendIceCandidates(event, "localPeer")
-    }
-
-    const connectionHandler = (event) => {
-      console.log("current peer connection status: ", peerConnectionLocalRef.current.connectionState)
-      if (peerConnectionLocalRef.current.connectionState == 'connected'){
-        // Peers are now connected 
-        console.log("peers connected!")
-      }
-    }
-    const localPeerAction = () => {
-      // Add media tracks
-      videoRef.current.srcObject.getTracks().forEach(track => {
-        console.log("track: ")
-        console.log(track)
-        peerConnectionLocalRef.current.addTrack(track, videoRef.current.srcObject)
-      })
-      
-      // Wait for WebRTC to retrieve ICE candidates and send them to other peer
-      peerConnectionLocalRef.current.addEventListener("icecandidate", handleIceLocalPeer)
-
-      // Listen for answer to offer by receiving party
-      socket.on("incoming-answer", message => {
-        console.log("incoming answer received in frontend")
-        console.log(message.answer)
-        if (message.answer){
-          let remoteDesc = new RTCSessionDescription(message.answer)
-          peerConnectionLocalRef.current.setRemoteDescription(remoteDesc)
-            .then(() => {
-              console.log("answer received IN FRONTEND")
-            })
-        }
-      })
-
-      // Create an offer and send it 
-      peerConnectionLocalRef.current.createOffer()
-        .then((offer) => {
-          peerConnectionLocalRef.current.setLocalDescription(offer)
-            .then(() => {
-              socket.emit("signal", { offer, roomId})
-            })
-        })
-      //check if connection between peers is established 
-      peerConnectionLocalRef.current.addEventListener('connectionstatechange', connectionHandler);
-    }
-
-    if (isVideoOn) {
+    if (!socket) return;
+    if (isVideoOn) {    
       console.log("video is on")
-      navigator.mediaDevices
-        .getUserMedia({ video: true })
-        .then((stream) => {
-          //store the stream reference for cleanup
-          videoRef.current.srcObject = stream
+      let shallowRef = videoRef.current;
 
-          if (participants.length)
-            localPeerAction()
-        })
+      // Enable local video if it is not enabled.
+      // If local video is already enabled, do nothing.
+      const handleVideo = async () => {
+        console.log(videoRef.current, videoRef.current?.srcObject);
+      
+        if (videoRef.current && !videoRef.current.srcObject) {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      
+            if (shallowRef && Object.is(shallowRef, videoRef.current)) {
+              videoRef.current.srcObject = stream;
+              console.log("Video stream attached successfully.");
+            }
+          } catch (error) {
+            console.error("Error accessing camera:", error);
+          }
+        }
+      };
+
+      // Prepares the local peer connection object by intializing it
+      const preparePeerConnection = async () => {
+        // If there are other participants, prepare the peer connection if not yet exist
+        if (participants.length > 0 && !peerConnectionLocalRef.current){
+          console.log("Discovered new participant, initializing peer connection...")
+          peerConnectionLocalRef.current = new RTCPeerConnection(configuration);
+          peerConnectionLocalRef.current.ontrack = trackHandler;
+
+          // Local peer needs sees if remote peer is ready
+          socket.on("peer_ready", (message) => {
+            // If remote peer is also ready, the local peer will begin the handshake process 
+            // to establish the peer connection
+            console.log("PEER MESSAGE RECEIVED, STATUS: ", message)
+            if (message.ready){
+              console.log("invoked local peer action")
+              localPeerAction();
+            }
+          })
+
+          // Let other participant know current participant's status so they
+          // can prepare a remote peer connection
+          socket.emit("media_state_change", {
+            roomId,
+            userId: socket.id,
+            mediaType: "video",
+            isOn: isVideoOn,
+            userName,
+            loc: 0
+          })
+
+          // Current issue (observation): Peer connection is not properly terminated on local side 
+          // if peer connection was already established. 
+          // Reproduce: One user joins room, open video, another user joins. This creates peer connection.
+          // Second user then closes tab, opens the tab again, and then the peer connection is not reset again.
+        }
+      }
+
+      // Enables local camera and then conditionally establish the peer connection
+      const initializeCall = async () => {
+        // First, ensure local video is enabled
+        await handleVideo(); 
+        
+        // Now, prepare the peer connection (if not already prepared)
+        await preparePeerConnection();
+      };
+      initializeCall();
     } else {
+      console.log("video is off")
+
+      // If last video state is on, then emit the change
+      if (lastVideoStateRef.current){
+        console.log("LAST VIDEO STATE IS ONNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN")
+        socket.emit("media_state_change", {
+          roomId,
+          userId: socket.id,
+          mediaType: "video",
+          isOn: isVideoOn,
+          userName,
+          loc: 1
+        })
+      }
+
       //video stream cleanup
       if (videoRef.current) {
         videoRef.current.getTracks().forEach((track) => {
-          console.log("track: ")
-          console.log(track)
           track.stop()
         });
         videoRef.current.srcObject = null;
+        console.log("local video tracks terminated")
       }
 
       // Terminate local peer-to-peer connection if it had one 
       if (peerConnectionLocalRef.current){
+        console.log("local peer connection terminated")
         peerConnectionLocalRef.current.close();
         peerConnectionLocalRef.current = null;
       }
@@ -331,30 +440,22 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
 
     return () => {
       console.log("NONEMPTY USEEFFECT CLEANUP")
-      if (peerConnectionLocalRef.current) {
-        peerConnectionLocalRef.current.removeEventListener("icecandidate", handleIceLocalPeer);
-        peerConnectionLocalRef.current.removeEventListener("connectionstatechange", connectionHandler);
-        socket.off('incoming-answer');
-      }
+      resetPeer('local')
+      socket.off('incoming-answer');
+      socket.off('peer_ready')
     }
-  }, [isVideoOn]);
+  }, [isVideoOn, participants.length, socket]);
 
-  // Both peers can call this
+  // Both peers' sockets can call this
   useEffect(() => {
+    if (!socket) return;
     // Listen for incoming ICE candidates and add them to the peer connection
     socket.on("incoming-candidates", handleIncomingCandidates)
 
     return () => {
-      //clean up stored streams when component unmounts
-      // Object.values(remoteStreamsRef.current).forEach(stream => {
-      //   if (stream && stream.getTracks) {
-      //     stream.getTracks().forEach(track => track.stop());
-      //   }
-      // });
-      // remoteStreamsRef.current = {};
       socket.off("incoming-candidates")
     }
-  }, [])
+  }, [socket])
 
   // Local audio stream, using audioStreamRef
   useEffect(() => {
