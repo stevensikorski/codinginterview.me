@@ -25,7 +25,7 @@ export default function TerminalRuntime({ output }) {
   }, [terminalLog]);
 
   return (
-    <div className="flex flex-col flex-grow rounded-b-xl bg-neutral-950">
+    <div className="flex flex-col flex-grow rounded-b-lg bg-neutral-950">
       {/* Shell */}
       <div ref={terminalRef} className="px-2 py-2 font-mono text-xs text-neutral-300 whitespace-pre-wrap overflow-y-auto h-full">
         {terminalLog.map((line, index) => (
