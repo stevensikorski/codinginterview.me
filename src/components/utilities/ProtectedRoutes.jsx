@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 
 // utility functions
-import { isAuthenticated } from "../utilities/auth_context.js"
+import { isAuthenticated } from "../utilities/auth_context.js";
+import Spinner from "../shared/Spinner.jsx";
 
 // Some routes can only be accessed if user is authenticated
 const ProtectedRoute = ({ element, ...rest }) => {
@@ -12,8 +13,8 @@ const ProtectedRoute = ({ element, ...rest }) => {
   useEffect(() => {
     const checkAuthentication = async () => {
       const authenticated = await isAuthenticated();
-      console.log("is user authenticated: ", authenticated)
-      if (authenticated){
+      console.log("is user authenticated: ", authenticated);
+      if (authenticated) {
         setIsAuthenticatedState(authenticated);
       }
       setIsLoading(false);
@@ -24,10 +25,10 @@ const ProtectedRoute = ({ element, ...rest }) => {
 
   // While we're checking the authentication, we can show a loading state or null
   if (isLoading) {
-    return <div>Loading...</div>; 
+    return <Spinner />;
   }
 
-  if (!isAuthenticatedState){
+  if (!isAuthenticatedState) {
     return <Navigate to="/" replace />;
   }
 
@@ -37,5 +38,4 @@ const ProtectedRoute = ({ element, ...rest }) => {
 
 export default ProtectedRoute;
 
-
-export { ProtectedRoute }
+export { ProtectedRoute };
