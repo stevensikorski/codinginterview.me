@@ -66,18 +66,21 @@ export default function DevelopmentEnvironmentPage({ roomId, socket, socketState
     <main className="flex h-screen w-screen bg-neutral-900 overflow-hidden whitespace-nowrap">
       {/*sidebar*/}
       <nav className="w-16 text-neutral-300 p-2 gap-2 flex flex-col shrink-0 bg-neutral-900">
+        <a href="/" className="flex justify-center items-center aspect-square text-neutral-600 rounded-lg border shadow border-neutral-800 hover:bg-editor transition duration-200" onClick={() => setShowProblemSelection(false)}>
+          <img src="/favicon.webp" alt="logo" className="size-8 object-contain grayscale opacity-50" />
+        </a>
         <button className="flex justify-center items-center aspect-square text-neutral-600 rounded-lg border shadow border-neutral-800 hover:bg-editor transition duration-200" onClick={() => setShowProblemSelection(false)}>
           <Columns2 />
         </button>
         <button className="flex justify-center items-center aspect-square text-neutral-600 rounded-lg border shadow border-neutral-800 hover:bg-editor transition duration-200" onClick={() => setShowProblemSelection(true)}>
           <AlignJustify />
         </button>
-        <button className="flex justify-center items-center aspect-square text-neutral-600 rounded-lg border shadow border-neutral-800 hover:bg-editor transition duration-200">
+        {/* <button className="flex justify-center items-center aspect-square text-neutral-600 rounded-lg border shadow border-neutral-800 hover:bg-editor transition duration-200">
           <ClipboardCheck />
         </button>
         <button className="flex justify-center items-center aspect-square text-neutral-600 rounded-lg border shadow border-neutral-800 hover:bg-editor transition duration-200">
           <Settings />
-        </button>
+        </button> */}
       </nav>
 
       {/*workspace container*/}
@@ -109,7 +112,7 @@ export default function DevelopmentEnvironmentPage({ roomId, socket, socketState
               Terminal
             </button>
             <button className="my-1 px-1 font-semibold text-neutral-600 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200" onClick={() => setActiveTab("tests")}>
-              Test Cases
+              Testing
             </button>
           </div>
 

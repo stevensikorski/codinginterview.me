@@ -85,7 +85,7 @@ export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket
     return () => {
       socket.off("synchronize_code", handleSynchronizedCode);
     };
-  }, []);
+  }, [socket]);
 
   const rotateFontSize = () => {
     const nextIndex = (fontSizes.indexOf(fontSize) + 1) % fontSizes.length;
