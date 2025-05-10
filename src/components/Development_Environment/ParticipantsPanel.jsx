@@ -488,7 +488,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
   return (
     <div className="flex flex-none flex-col rounded-lg border shadow bg-editor border-neutral-800 overflow-hidden">
       <div className="flex flex-row justify-between items-center bg-neutral-900">
-        <p className="p-1 px-2 font-semibold text-neutral-600">Participants {remoteUser ? "(2)" : "(1)"}</p>
+        <p className="p-1 px-2 font-semibold text-neutral-600">Participants</p>
 
         {/* Media Control Buttons */}
         <div className="flex items-center px-1 gap-1">

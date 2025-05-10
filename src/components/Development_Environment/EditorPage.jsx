@@ -82,7 +82,7 @@ export default function DevelopmentEnvironmentPage({ roomId, socket, socketState
       {/*workspace container*/}
       <div className="relative flex flex-row flex-1 overflow-hidden">
         {/*left section*/}
-        <section className="flex flex-col justify-between my-2 gap-2 shrink-0 min-w-[400px] max-w-[65%]" style={{ width: `${leftWidth}%` }}>
+        <section className="flex flex-col justify-between my-2 gap-2 shrink-0 min-w-[500px] max-w-[65%]" style={{ width: `${leftWidth}%` }}>
           {/*pass selected problem to problem panel*/}
           <ProblemPanel selectedProblem={selectedProblem} setSelectedProblem={setSelectedProblem} roomId={roomId} socket={socket} />
 

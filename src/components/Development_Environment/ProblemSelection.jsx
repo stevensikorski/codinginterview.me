@@ -153,8 +153,8 @@ export default function ProblemSelection({ isClose, onClose, onSelectProblem, ro
       {/*search and filters*/}
       <div>
         <div className="relative">
-          <input type="text" placeholder="Search by title or tag..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-editor border border-neutral-800 rounded-lg py-2 pl-10 pr-3 text-neutral-300 placeholder-neutral-600 focus:outline-none focus:ring-1 focus:ring-neutral-700" />
-          <Search className="absolute left-3 top-2.5 text-neutral-600" size={18} />
+          <input type="text" placeholder="Search by title or tag..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-editor border border-neutral-800 rounded-lg py-2 pl-10 pr-3 text-neutral-400 placeholder-neutral-600 focus:outline-none" />
+          <Search className="absolute left-3 top-3 text-neutral-600" size={18} />
         </div>
 
         <div className="flex my-2 space-x-2">
