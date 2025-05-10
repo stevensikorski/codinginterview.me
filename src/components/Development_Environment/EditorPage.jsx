@@ -7,6 +7,7 @@ import { AlignJustify, Columns2, ClipboardCheck, Settings } from "lucide-react";
 import ProblemSelection from "./ProblemSelection";
 import ProblemPanel from "./ProblemPanel";
 import { getUser } from "../utilities/auth_context";
+import TestPanel from "./TestPanel";
 
 export default function DevelopmentEnvironmentPage({ roomId, socket, socketState }) {
   const [activeTab, setActiveTab] = useState("editor");
@@ -107,6 +108,9 @@ export default function DevelopmentEnvironmentPage({ roomId, socket, socketState
             <button className="my-1 px-1 font-semibold text-neutral-600 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200" onClick={() => setActiveTab("terminal")}>
               Terminal
             </button>
+            <button className="my-1 px-1 font-semibold text-neutral-600 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200" onClick={() => setActiveTab("tests")}>
+              Test Cases
+            </button>
           </div>
 
           <div className="flex flex-col flex-grow">
@@ -118,6 +122,9 @@ export default function DevelopmentEnvironmentPage({ roomId, socket, socketState
             </div>
             <div className={activeTab === "terminal" ? "flex-grow flex" : "hidden"}>
               <TerminalRuntime output={codeOutput} />
+            </div>
+            <div className={activeTab === "tests" ? "flex-grow flex" : "hidden"}>
+              <TestPanel />
             </div>
           </div>
         </section>
