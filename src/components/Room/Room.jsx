@@ -5,6 +5,7 @@ import { io } from "socket.io-client";
 
 // Components
 import DevelopmentEnvironmentPage from "../Development_Environment/EditorPage";
+import Spinner from "../shared/Spinner";
 
 // This component represents a room in which participants join
 // All sockets are initialized here and disconnected here
@@ -18,16 +19,16 @@ function Room() {
   const socketRef = useRef(null);
   useEffect(() => {
     if (!socketRef.current) {
-      socketRef.current = io(`${process.env.REACT_APP_BACKEND_HOST}`, { 
-        path: '/createsession'      
-      })
-    } 
+      socketRef.current = io(`${process.env.REACT_APP_BACKEND_HOST}`, {
+        path: "/createsession",
+      });
+    }
 
     // Event handlers
     const validateCurrentRoom = async () => {
       // Fetch the room data using the ID;
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_HOST}/rooms/${roomId}/validate`); 
-      console.log(response)
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_HOST}/rooms/${roomId}/validate`);
+      console.log(response);
       // HTTP Code 200 (OK)
       if (response.ok) {
         // Room is valid
@@ -39,57 +40,58 @@ function Room() {
 
     // For user validation in room, use socket
     const handleBindRoomUsers = (message) => {
-      if (message.status === 'Success'){
-        console.log('Room successfully bound to user')
-        socketRef.current.emit("get_room_users", { 'roomId':roomId });
+      if (message.status === "Success") {
+        console.log("Room successfully bound to user");
+        socketRef.current.emit("get_room_users", { roomId: roomId });
+      } else {
+        console.log("Room failed to bound to user");
       }
-      else{
-        console.log('Room failed to bound to user')
-      }
-    }
+    };
 
     const handleGetRoomUsers = (response) => {
       console.log(`Users in room ${roomId}: ${response}`);
       setIsLoading(false);
-    }
+    };
 
     const bindRoomUser = async () => {
       const user = await getUser();
       const uid = user.uid;
 
       // Make sure binding comes before fetching room users
-      socketRef.current.emit("bind_room_user", { 'uid':uid, 'roomId':roomId });
+      socketRef.current.emit("bind_room_user", { uid: uid, roomId: roomId });
     };
 
     // Event listeners
-    socketRef.current.on("bind_room_user", handleBindRoomUsers)
-    socketRef.current.on("get_room_users", handleGetRoomUsers)
+    socketRef.current.on("bind_room_user", handleBindRoomUsers);
+    socketRef.current.on("get_room_users", handleGetRoomUsers);
     socketRef.current.on("connect", async () => {
-      console.log("socket connected")
-      setIsSocketConnected(true)
+      console.log("socket connected");
+      setIsSocketConnected(true);
       await validateCurrentRoom();
       await bindRoomUser();
-    })
+    });
     socketRef.current.on("disconnect", () => {
-      console.log("socket disconnected")
-      setIsSocketConnected(false)
-    })
+      console.log("socket disconnected");
+      setIsSocketConnected(false);
+    });
 
     return () => {
       socketRef.current.removeAllListeners();
       socketRef.current.disconnect();
-      socketRef.current = null
-      console.log("cleaned")
-    }
+      socketRef.current = null;
+      console.log("cleaned");
+    };
   }, []);
 
-
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <Spinner />;
 
   if (!isValidRoom)
-    return <div>Unauthorized</div>;
-  else
-    return <DevelopmentEnvironmentPage roomId={roomId} socket={socketRef.current} socketState={isSocketConnected}/>;
+    return (
+      <div className="bg-neutral-900 h-screen w-screen flex items-center justify-center">
+        <h1>Unauthorized.</h1>
+      </div>
+    );
+  else return <DevelopmentEnvironmentPage roomId={roomId} socket={socketRef.current} socketState={isSocketConnected} />;
 }
 
 export default Room;
