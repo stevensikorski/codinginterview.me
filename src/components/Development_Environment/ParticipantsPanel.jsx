@@ -9,6 +9,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
   const videoRef = useRef(null);
   const audioRef = useRef(null);
   
+  const micStream = useRef(null);
 
   const remoteVidRef = useRef(null);
   const peerConnectionLocalRef = useRef(null);
@@ -328,59 +329,56 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
     };
   }, [socket]);
 
-  // Local audio stream
   useEffect(() => {
-    console.log("INSIDE AUDIO USEEFFECT")
-    if (isMicOn) {
-      let shallowRef = audioRef.current;
-      const handleAudio = async () => {
-        console.log(audioRef.current, audioRef.current?.srcObject);
-        // If there's no existing audio stream
-        if (audioRef.current && !audioRef.current.srcObject) {
+    console.log("INSIDE AUDIO USEEFFECT");
+  
+    const peerConnection = peerConnectionLocalRef.current;
+  
+    const startMic = async () => {
+      try {  
+        if (peerConnection) {
+          micStream.current.getAudioTracks().forEach(track => {
+            peerConnection.addTrack(track, micStream.current);
+          });
+  
+          const offer = await peerConnection.createOffer();
+          await peerConnection.setLocalDescription(offer);
+          socket.emit("signal", { offer, roomId });
+        }
+  
+        console.log("Microphone stream sent to remote peer.");
+      } catch (err) {
+        console.error("Error accessing microphone:", err);
+      }
+    };
+  
+    const stopMic = () => {
+      if (peerConnection) {
+        const audioSender = peerConnection.getSenders().find(
+          sender => sender.track?.kind === 'audio'
+        );
+  
+        if (audioSender) {
           try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });      
-            if (shallowRef && Object.is(shallowRef, audioRef.current)) {      
-              // Add audio track to existing peer connection if available
-              if (peerConnectionLocalRef.current) {
-                stream.getTracks().forEach((track) => {
-                  peerConnectionLocalRef.current.addTrack(track, stream);
-                });
-      
-                // Renegotiate
-                const offer = await peerConnectionLocalRef.current.createOffer();
-                await peerConnectionLocalRef.current.setLocalDescription(offer);
-                socket.emit("signal", { offer, roomId });
-              }
-      
-              console.log("Audio stream attached successfully.");
-            }
-          } catch (err) {
-            console.error("Error accessing microphone:", err);
+            audioSender.replaceTrack(null); // stop sending audio
+          } catch (e) {
+            console.warn("Failed to replace audio track:", e);
           }
         }
-      };
-      
-      const initializeAudio = async () => {
-        await handleAudio();
-      };
-      initializeAudio();      
+      }
+    };
+  
+    if (isMicOn) {
+      startMic();
     } else {
-      // Stop playing local audio
-      if (audioRef.current && audioRef.current.srcObject) {
-        audioRef.current.srcObject.getTracks().forEach((track) => track.stop());
-        audioRef.current.srcObject = null;
-      }
-
-      // Stop sending local audio to remote peer
-      if (peerConnectionLocalRef.current){
-        const senders = peerConnectionLocalRef.current?.getSenders() || [];
-        const audioSender = senders.find(sender => sender.track?.kind === 'audio');
-        if (audioSender) {
-          audioSender.replaceTrack(null); // Or use removeTrack(sender)
-        }
-      }
+      stopMic();
     }
+  
+    return () => {
+      if (!isMicOn) stopMic();
+    };
   }, [isMicOn]);
+  
 
   // Create peer connection before video/audio is/are enabled
   // Idea is that when video/audio is enabled, simply add tracks to the existing connection.
@@ -478,6 +476,19 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
       resetPeer("remote")
     }
     }, [participants.length])
+
+  useEffect(() => {
+    const allowMic = async () => {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+        },
+      });      
+      micStream.current = stream;
+    }
+    allowMic();
+  }, [])
 
   // Get the remote user (if any)
   const remoteUser = participants.length > 0 ? participants[0] : null;
