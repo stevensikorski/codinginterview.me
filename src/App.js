@@ -164,7 +164,7 @@ io.on("connection", (socket) => {
 
   // Media state change (video/audio toggle)
   socket.on("media_state_change", (data) => {
-    console.log("media state change request received by user " + data.userName + " at location: " + data.loc)
+    // console.log("media state change request received by user " + socket.userData.userName)
     const { roomId, mediaType, isOn } = data;
 
     // Update socket user data
