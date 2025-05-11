@@ -95,21 +95,18 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
       console.error("No stream in track event!");
       return;
     }
-    
-    // Get audio and video tracks
-    const audioTracks = remoteStream.getAudioTracks(); // Array of MediaStreamTrack
-    const videoTracks = remoteStream.getVideoTracks(); // Array of MediaStreamTrack
-    
-    // Example: get the first audio and video track
-    const audioTrack = audioTracks.length > 0 ? audioTracks[0] : null;
-    const videoTrack = videoTracks.length > 0 ? videoTracks[0] : null;
-    
-    // Create new streams
-    const audioOnlyStream = audioTrack ? new MediaStream([audioTrack]) : null;
-    const videoOnlyStream = videoTrack ? new MediaStream([videoTrack]) : null;
-
-    if (audioOnlyStream) audioRef.current.srcObject = audioOnlyStream;
-    if (videoOnlyStream) remoteVidRef.current.srcObject = videoOnlyStream;
+    if (event.track.kind === 'audio'){
+      console.log("RECEIVED AUDIO STREAM!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
+        console.log("Track state:", event.track.readyState); // Must be "live"
+      audioRef.current.srcObject = remoteStream;
+      // Force play with fallback
+      audioRef.current.play().catch((err) => {
+        console.warn("Audio play blocked by browser:", err);
+      });
+    }
+    else{
+      remoteVidRef.current.srcObject = remoteStream;
+    } 
   };
 
   // Resets peer connection based on role
@@ -342,9 +339,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
         if (audioRef.current && !audioRef.current.srcObject) {
           try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });      
-            if (shallowRef && Object.is(shallowRef, audioRef.current)) {
-              audioRef.current.srcObject = stream;
-      
+            if (shallowRef && Object.is(shallowRef, audioRef.current)) {      
               // Add audio track to existing peer connection if available
               if (peerConnectionLocalRef.current) {
                 stream.getTracks().forEach((track) => {
@@ -374,6 +369,15 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
       if (audioRef.current && audioRef.current.srcObject) {
         audioRef.current.srcObject.getTracks().forEach((track) => track.stop());
         audioRef.current.srcObject = null;
+      }
+
+      // Stop sending local audio to remote peer
+      if (peerConnectionLocalRef.current){
+        const senders = peerConnectionLocalRef.current?.getSenders() || [];
+        const audioSender = senders.find(sender => sender.track?.kind === 'audio');
+        if (audioSender) {
+          audioSender.replaceTrack(null); // Or use removeTrack(sender)
+        }
       }
     }
   }, [isMicOn]);
