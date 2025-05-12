@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { X, Search } from "lucide-react";
+import { X, Search, ShieldUser } from "lucide-react";
+import Spinner from "../shared/Spinner";
 
 import { getUser } from "../utilities/auth_context";
 //mock problems data
@@ -152,11 +153,17 @@ export default function ProblemSelection({ isClose, onClose, onSelectProblem, ro
   }, [isClose]);
 
   if (loading) {
-    return <div style={{ color: "white" }}>Loading</div>;
+    return <Spinner />;
   }
 
   if (!authorizedUser) {
-    return <div style={{ color: "white" }}>Problem Selection is for interviewers only</div>;
+    return (
+      <div className="bg-neutral-900 h-screen w-screen flex flex-col items-center justify-center">
+        <ShieldUser className="size-14 text-neutral-700" />
+        <h2 className="text-neutral-700 text-3xl font-semibold mt-2">Problem Selection Page</h2>
+        <p className="text-neutral-700 font-medium">Interviewers have access to this.</p>
+      </div>
+    );
   }
   //filter problems based on search term (matching title OR tags) and difficulty
   const filteredProblems = Object.values(problems).filter((problem) => {
