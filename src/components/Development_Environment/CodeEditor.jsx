@@ -230,7 +230,6 @@ export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket
                 key={key}
                 onClick={() => {
                   setLanguage(key);
-                  setCode(StarterCode[key]);
                   setTabSize(4);
                   setTimeout(() => {
                     editorRef.current?.getModel()?.updateOptions({ tabSize });
