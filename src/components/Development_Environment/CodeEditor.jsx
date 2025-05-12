@@ -18,7 +18,7 @@ export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket
   const [language, setLanguage] = useState("python");
   const [code, setCode] = useState(() => {
     // Initialize code based on selected problem and language
-    return selectedProblem?.code?.[language] || StarterCode[language];
+    return selectedProblem?.code?.[language] || "";
   });
   const [position, setPosition] = useState({ line: 1, column: 1 });
 
@@ -32,7 +32,7 @@ export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket
 
   useEffect(() => {
     // Update code when problem or language changes
-    const newCode = selectedProblem?.code?.[language] || StarterCode[language];
+    const newCode = selectedProblem?.code?.[language] || "";
     setCode(newCode);
 
     // Reset tab size

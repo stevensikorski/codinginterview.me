@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 
 export default function ProblemPanel({ selectedProblem, setSelectedProblem, roomId, socket }) {
   //default content if no problem is selected
@@ -75,7 +76,9 @@ export default function ProblemPanel({ selectedProblem, setSelectedProblem, room
       {/*markdown content*/}
       <div className="relative flex-1 min-h-0">
         <div className="absolute inset-0 overflow-y-scroll p-4 break-words text-wrap markdown [&::-webkit-scrollbar]:w-0 text-neutral-300">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{problem.description}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+            {problem.description}
+          </ReactMarkdown>
           <p className="pt-4 opacity-25 select-none">codinginterview.me</p>
         </div>
         <span className="pointer-events-none absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-editor to-transparent z-50" />
