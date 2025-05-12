@@ -118,7 +118,7 @@ export default function DevelopmentEnvironmentPage({ roomId, socket, socketState
 
           <div className="flex flex-col flex-grow">
             <div className={activeTab === "editor" ? "flex-grow flex" : "hidden"}>
-              <CodeEditor setActiveTab={setActiveTab} setCodeOutput={setCodeOutput} roomId={roomId} socket={socket} />
+              <CodeEditor setActiveTab={setActiveTab} setCodeOutput={setCodeOutput} roomId={roomId} socket={socket} selectedProblem={selectedProblem} />
             </div>
             <div className={activeTab === "notepad" ? "flex-grow flex" : "hidden"}>
               <NoteEditor roomId={roomId} socket={socket} />

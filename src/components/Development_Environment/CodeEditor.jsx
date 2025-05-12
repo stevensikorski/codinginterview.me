@@ -10,13 +10,16 @@ const languages = [
   { key: "cpp", name: "C++", id: 54 },
 ];
 
-export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket }) {
+export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket, selectedProblem }) {
   const editorRef = useRef(null);
   const monacoRef = useRef(null);
 
   const [isOpen, setIsOpen] = useState(false);
   const [language, setLanguage] = useState("python");
-  const [code, setCode] = useState(StarterCode[language]);
+  const [code, setCode] = useState(() => {
+    // Initialize code based on selected problem and language
+    return selectedProblem?.code?.[language] || StarterCode[language];
+  });
   const [position, setPosition] = useState({ line: 1, column: 1 });
 
   const [fontSize, setFontSize] = useState(14);
@@ -26,6 +29,18 @@ export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket
 
   const fontSizes = [10, 12, 14, 16, 18, 20];
   const tabSizes = [2, 4];
+
+  useEffect(() => {
+    // Update code when problem or language changes
+    const newCode = selectedProblem?.code?.[language] || StarterCode[language];
+    setCode(newCode);
+
+    // Reset tab size
+    setTabSize(4);
+    setTimeout(() => {
+      editorRef.current?.getModel()?.updateOptions({ tabSize: 4 });
+    }, 0);
+  }, [selectedProblem, language]);
 
   // Timeout function to automatically save and synchronize code
   const debounceTimeout = useRef(null);
