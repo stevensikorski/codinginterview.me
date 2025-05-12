@@ -87,11 +87,18 @@ io.on("connection", (socket) => {
     socket.broadcast.to(roomId).emit("synchronize_code", newCode);
   });
 
-  // Sychronize editor codes for users in same room
+  // Sychronize editor notes for users in same room
   socket.on("synchronize_notepad", (msg) => {
     const { roomId, newNotes } = msg;
     // Broadcast the updated code to all other users in the same room
     socket.broadcast.to(roomId).emit("synchronize_notepad", newNotes);
+  });
+
+  // Sychronize editor terminal for users in same room
+  socket.on("synchronize_terminal", (msg) => {
+    const { roomId, terminalOutput } = msg;
+    // Broadcast the terminal output to all other users in the same room
+    socket.broadcast.to(roomId).emit("synchronize_terminal", terminalOutput);
   });
 
   // Synchronizes problem selection for users in same room

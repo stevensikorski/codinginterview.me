@@ -173,9 +173,28 @@ export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket
 
       const finalOutput = [result?.stdout, result?.stderr, result?.compile_output, result?.message, `[${result?.status?.description || "Unknown Status"}]`].filter(Boolean).join("\n\n") || "No output.";
 
+      // Emit the terminal output to all users in the room
+      if (socket && roomId) {
+        socket.emit("synchronize_terminal", {
+          roomId,
+          terminalOutput: finalOutput,
+        });
+      }
+
+      // Set the output for local display
       setCodeOutput(finalOutput);
     } catch (err) {
-      setCodeOutput("Error: " + err.message);
+      const errorOutput = "Error: " + err.message;
+
+      // Emit the error output to all users in the room
+      if (socket && roomId) {
+        socket.emit("synchronize_terminal", {
+          roomId,
+          terminalOutput: errorOutput,
+        });
+      }
+
+      setCodeOutput(errorOutput);
     }
   };
 

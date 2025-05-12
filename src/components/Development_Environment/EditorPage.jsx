@@ -124,7 +124,7 @@ export default function DevelopmentEnvironmentPage({ roomId, socket, socketState
               <NoteEditor roomId={roomId} socket={socket} />
             </div>
             <div className={activeTab === "terminal" ? "flex-grow flex" : "hidden"}>
-              <TerminalRuntime output={codeOutput} />
+              <TerminalRuntime output={codeOutput} roomId={roomId} socket={socket} />
             </div>
             <div className={activeTab === "tests" ? "flex-grow flex" : "hidden"}>
               <TestPanel />
