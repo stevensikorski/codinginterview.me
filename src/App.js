@@ -87,6 +87,12 @@ io.on("connection", (socket) => {
     socket.broadcast.to(roomId).emit("synchronize_code", newCode);
   });
 
+  socket.on("synchronize_language", (msg) => {
+    const { roomId, language } = msg;
+    // Broadcast the selected language to all other users in the same room
+    socket.broadcast.to(roomId).emit("synchronize_language", language);
+  });
+
   // Sychronize editor notes for users in same room
   socket.on("synchronize_notepad", (msg) => {
     const { roomId, newNotes } = msg;

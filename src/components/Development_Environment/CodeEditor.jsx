@@ -17,7 +17,6 @@ export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket
   const [isOpen, setIsOpen] = useState(false);
   const [language, setLanguage] = useState("python");
   const [code, setCode] = useState(() => {
-    // Initialize code based on selected problem and language
     return selectedProblem?.code?.[language] || "";
   });
   const [position, setPosition] = useState({ line: 1, column: 1 });
@@ -63,6 +62,19 @@ export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket
       }
     }
   };
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleSynchronizedLanguage = (newLanguage) => {
+      setLanguage(newLanguage);
+    };
+
+    socket.on("synchronize_language", handleSynchronizedLanguage);
+    return () => {
+      socket.off("synchronize_language", handleSynchronizedLanguage);
+    };
+  }, [socket]);
 
   // Reflect incoming code changes to sychronize code
   useEffect(() => {
@@ -230,6 +242,7 @@ export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket
                 key={key}
                 onClick={() => {
                   setLanguage(key);
+                  socket.emit("synchronize_language", { roomId, language: key });
                   setTabSize(4);
                   setTimeout(() => {
                     editorRef.current?.getModel()?.updateOptions({ tabSize });
