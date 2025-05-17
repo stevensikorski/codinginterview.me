@@ -192,6 +192,10 @@ io.on("connection", (socket) => {
     socket.to(data.roomId).emit("reset_peer", data)
   })
 
+  socket.on("update_video", (data) => {
+    socket.to(data.roomId).emit("update_video", data)
+  })
+
   socket.on("peer_connection_prepared", (data) => {
     console.log("peer connection prepared request")
     socket.to(data.roomId).emit("peer_connection_prepared", data)

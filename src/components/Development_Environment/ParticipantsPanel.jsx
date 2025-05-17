@@ -8,6 +8,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
   const [remoteMicEnabled, setRemoteMicEnabled] = useState(false);
   const [remoteVidEnabled, setRemoteVidEnabled] = useState(false);
   const [peerConnectionReady, setPeerConnectionReady] = useState(false); // Tracks if remote peer is ready
+  const remoteVideoTrackRef = useRef(null); 
 
   const [localReady, setLocalReady] = useState(false);
   const [remoteReady, setRemoteReady] = useState(false);
@@ -98,6 +99,8 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
           console.log(videoRef.current)
           console.log("✅ Replaced video track via transceiver sender");
         }
+
+        socket.emit("update_video", { roomId: roomId});
       } else {
         console.warn("⚠️ No available video transceiver/sender found");
       }
@@ -130,17 +133,13 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
 
   // Keeps track of remote streams
   const trackHandler = async (event) => {
-    console.log(peerConnectionRemoteRef.current.getSenders())
-    console.log(event.track)
-    console.log(event.streams)
+    console.log("📡 ontrack fired!", event.track.kind, event.track.id);
     let remoteStream = event.streams[0];
     if (!remoteStream){
       remoteStream = new MediaStream();
     }
  
     if (event.track.kind === 'audio'){
-      console.log("RECEIVED AUDIO STREAM!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
-      console.log("Track state:", event.track.readyState); // Must be "live"
       remoteStream.addTrack(event.track)
       audioRef.current.srcObject = remoteStream;
 
@@ -152,21 +151,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
       console.log("AUDIO PLAYED BY RECEIVER")
     }
     else if (event.track.kind === 'video') {
-      if (remoteVidRef.current) {
-        // Create new MediaStream if needed
-        if (!remoteVidRef.current.srcObject) {
-          remoteVidRef.current.srcObject = new MediaStream();
-        }
-        
-        // Clear existing tracks
-        remoteVidRef.current.srcObject.getTracks().forEach(track => {
-          remoteVidRef.current.srcObject.removeTrack(track);
-        });
-        
-        // Add new track
-        remoteVidRef.current.srcObject.addTrack(event.track);
-        remoteVidRef.current.play().catch(err => console.warn("Video play error:", err));
-      }
+      remoteVideoTrackRef.current = event.track
     }
   };
 
@@ -500,6 +485,26 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
       console.log(peerConnectionLocalRef.current.connectionState);
     });
 
+    socket.on("update_video", (data) => {
+      if (remoteVidRef.current) {
+        // Create new MediaStream if needed
+        if (!remoteVidRef.current.srcObject) {
+          remoteVidRef.current.srcObject = new MediaStream();
+        }
+        
+        // Clear existing tracks
+        remoteVidRef.current.srcObject.getTracks().forEach(track => {
+          remoteVidRef.current.srcObject.removeTrack(track);
+        });
+        
+        // Add new track
+        if (remoteVideoTrackRef.current){
+          remoteVidRef.current.srcObject.addTrack(remoteVideoTrackRef.current);
+          remoteVidRef.current.play().catch(err => console.warn("Video play error:", err));
+        }
+      }
+    })
+    
     socket.on("peer_ack", (data) => {
       // On acknowledgement to audio, add tracks to existing, established peer connection
       if (data.audioAck){
@@ -644,6 +649,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
       socket.off("participants_list");
       socket.off("participant_left");
       socket.off("media_state_update")
+      socket.off("update_video");
       window.removeEventListener("beforeunload", handleUnload);
     }
   }, [userName, socket, roomId])
