@@ -111,9 +111,9 @@ export default function DevelopmentEnvironmentPage({ roomId, socket, socketState
             <button className="my-1 px-1 font-semibold text-neutral-600 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200" onClick={() => setActiveTab("terminal")}>
               Terminal
             </button>
-            <button className="my-1 px-1 font-semibold text-neutral-600 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200" onClick={() => setActiveTab("tests")}>
+            {/* <button className="my-1 px-1 font-semibold text-neutral-600 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200" onClick={() => setActiveTab("tests")}>
               Testing
-            </button>
+            </button> */}
           </div>
 
           <div className="flex flex-col flex-grow">
