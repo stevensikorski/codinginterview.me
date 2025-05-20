@@ -1,119 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { X, Search, ShieldUser } from "lucide-react";
 import Spinner from "../shared/Spinner";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 
 import { getUser } from "../utilities/auth_context";
-//mock problems data
-const problems = {
-  prob001: {
-    problemID: "prob001",
-    title: "Two Sum",
-    tags: ["List", "Dictionary"],
-    difficulty: "Easy",
-    description: "Write a function that takes a list of integers and a target sum, and returns the indices of two numbers that add up to the target. You may assume each input has exactly one solution, and you cannot use the same element twice.",
-    code: {
-      python: `# Time Complexity:\n# Space Complexity:\n\nclass Solution:\n    def twoSum(self, nums: List[int], target: int) -> List[int]:\n`,
-      javascript: `// Time Complexity:\n// Space Complexity:\n\nvar twoSum = function(nums, target) {\n\n};`,
-      cpp: `// Time Complexity:\n// Space Complexity:\n\nclass Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n    \n    }\n};`,
-    },
-  },
-  prob002: {
-    problemID: "prob002",
-    title: "Valid Parentheses",
-    tags: ["String", "List"],
-    difficulty: "Easy",
-    description: "Write a function that takes a string containing only the characters '(', ')', '{', '}', '[', and ']', and determines if the input string is valid. A string is valid if all brackets are closed in the correct order.",
-    code: {
-      python: `# Time Complexity:\n# Space Complexity:\n\nclass Solution:\n    def isValid(self, s: str) -> bool:\n`,
-      javascript: `// Time Complexity:\n// Space Complexity:\n\nvar isValid = function(s) {\n\n};`,
-      cpp: `// Time Complexity:\n// Space Complexity:\n\nclass Solution {\npublic:\n    bool isValid(string s) {\n    \n    }\n};`,
-    },
-  },
-  prob003: {
-    problemID: "prob003",
-    title: "First Unique Character",
-    tags: ["String", "Dictionary", "Counting"],
-    difficulty: "Easy",
-    description: "Write a function that finds the first non-repeating character in a string and returns its index. If it doesn't exist, return -1.",
-    code: {
-      python: `# Time Complexity:\n# Space Complexity:\n\nclass Solution:\n    def firstUniqChar(self, s: str) -> int:\n`,
-      javascript: `// Time Complexity:\n// Space Complexity:\n\nvar firstUniqChar = function(s) {\n\n};`,
-      cpp: `// Time Complexity:\n// Space Complexity:\n\nclass Solution {\npublic:\n    int firstUniqChar(string s) {\n    \n    }\n};`,
-    },
-  },
-  prob004: {
-    problemID: "prob004",
-    title: "Group Anagrams",
-    tags: ["Dictionary", "String", "Sorting"],
-    difficulty: "Medium",
-    description: "Write a function that groups anagrams together from a list of strings. Two strings are anagrams if they contain the same characters but in a different order.",
-    code: {
-      python: `# Time Complexity:\n# Space Complexity:\n\nclass Solution:\n    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:\n`,
-      javascript: `// Time Complexity:\n// Space Complexity:\n\nvar groupAnagrams = function(strs) {\n\n};`,
-      cpp: `// Time Complexity:\n// Space Complexity:\n\nclass Solution {\npublic:\n    vector<vector<string>> groupAnagrams(vector<string>& strs) {\n    \n    }\n};`,
-    },
-  },
-  prob005: {
-    problemID: "prob005",
-    title: "Matrix Island Count",
-    tags: ["Matrix", "Depth-First Search", "Recursion"],
-    difficulty: "Medium",
-    description: "Write a function that counts the number of islands in a 2D grid. An island is a group of connected 1's (representing land) surrounded by 0's (representing water). The grid cells are connected horizontally and vertically.",
-    code: {
-      python: `# Time Complexity:\n# Space Complexity:\n\nclass Solution:\n    def numIslands(self, grid: List[List[str]]) -> int:\n`,
-      javascript: `// Time Complexity:\n// Space Complexity:\n\nvar numIslands = function(grid) {\n\n};`,
-      cpp: `// Time Complexity:\n// Space Complexity:\n\nclass Solution {\npublic:\n    int numIslands(vector<vector<char>>& grid) {\n    \n    }\n};`,
-    },
-  },
-  prob006: {
-    problemID: "prob006",
-    title: "Maximum Subarray Sum",
-    tags: ["List", "Dynamic Programming"],
-    difficulty: "Medium",
-    description: "Write a function that finds a contiguous subarray with the largest sum and returns that sum. The array may contain both positive and negative integers.",
-    code: {
-      python: `# Time Complexity:\n# Space Complexity:\n\nclass Solution:\n    def maxSubArray(self, nums: List[int]) -> int:\n`,
-      javascript: `// Time Complexity:\n// Space Complexity:\n\nvar maxSubArray = function(nums) {\n\n};`,
-      cpp: `// Time Complexity:\n// Space Complexity:\n\nclass Solution {\npublic:\n    int maxSubArray(vector<int>& nums) {\n    \n    }\n};`,
-    },
-  },
-  prob007: {
-    problemID: "prob007",
-    title: "Word Search",
-    tags: ["Matrix", "Backtracking", "Depth-First Search"],
-    difficulty: "Hard",
-    description: "Write a function that determines if a word exists in a 2D board of characters. The word can be constructed from adjacent cells (horizontally or vertically), and each cell can be used only once.",
-    code: {
-      python: `# Time Complexity:\n# Space Complexity:\n\nclass Solution:\n    def exist(self, board: List[List[str]], word: str) -> bool:\n`,
-      javascript: `// Time Complexity:\n// Space Complexity:\n\nvar exist = function(board, word) {\n\n};`,
-      cpp: `// Time Complexity:\n// Space Complexity:\n\nclass Solution {\npublic:\n    bool exist(vector<vector<char>>& board, string word) {\n    \n    }\n};`,
-    },
-  },
-  prob008: {
-    problemID: "prob008",
-    title: "Longest Palindromic Substring",
-    tags: ["String", "Dynamic Programming"],
-    difficulty: "Hard",
-    description: "Write a function that finds the longest palindromic substring in a given string. A palindrome reads the same forwards and backwards.",
-    code: {
-      python: `# Time Complexity:\n# Space Complexity:\n\nclass Solution:\n    def longestPalindrome(self, s: str) -> str:\n`,
-      javascript: `// Time Complexity:\n// Space Complexity:\n\nvar longestPalindrome = function(s) {\n\n};`,
-      cpp: `// Time Complexity:\n// Space Complexity:\n\nclass Solution {\npublic:\n    string longestPalindrome(string s) {\n    \n    }\n};`,
-    },
-  },
-  prob009: {
-    problemID: "prob009",
-    title: "Meeting Rooms II",
-    tags: ["List", "Sorting", "Priority Queue", "Greedy"],
-    difficulty: "Hard",
-    description: "Given a list of meeting time intervals (start, end), write a function to find the minimum number of meeting rooms required to hold all meetings.",
-    code: {
-      python: `# Time Complexity:\n# Space Complexity:\n\nclass Solution:\n    def minMeetingRooms(self, intervals: List[List[int]]) -> int:\n`,
-      javascript: `// Time Complexity:\n// Space Complexity:\n\nvar minMeetingRooms = function(intervals) {\n\n};`,
-      cpp: `// Time Complexity:\n// Space Complexity:\n\nclass Solution {\npublic:\n    int minMeetingRooms(vector<vector<int>>& intervals) {\n    \n    }\n};`,
-    },
-  },
-};
+import Problems from "./Problems";
 
 export default function ProblemSelection({ isClose, onClose, onSelectProblem, roomId }) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -150,7 +43,7 @@ export default function ProblemSelection({ isClose, onClose, onSelectProblem, ro
       }
     };
     checkAuthorization();
-  }, [isClose]);
+  }, [isClose, roomId]);
 
   if (loading) {
     return <Spinner />;
@@ -166,7 +59,7 @@ export default function ProblemSelection({ isClose, onClose, onSelectProblem, ro
     );
   }
   //filter problems based on search term (matching title OR tags) and difficulty
-  const filteredProblems = Object.values(problems).filter((problem) => {
+  const filteredProblems = Object.values(Problems).filter((problem) => {
     const matchesTitle = problem.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesTags = problem.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesSearch = searchTerm === "" || matchesTitle || matchesTags;
@@ -219,9 +112,9 @@ export default function ProblemSelection({ isClose, onClose, onSelectProblem, ro
       </div>
 
       {/*problem list*/}
-      <div className="flex-grow overflow-y-auto pr-1 -mr-1 pt-0.5">
+      <div className="flex-grow overflow-y-auto pr-1 -mr-1 pt-0.5 pb-8">
         {filteredProblems.length === 0 ? (
-          <div className="text-center text-neutral-500 my-4">No problems match your search</div>
+          <div className="text-center text-neutral-500 my-8">No problems match your search.</div>
         ) : (
           <div className="grid gap-3">
             {filteredProblems.map((problem) => (
@@ -235,12 +128,17 @@ export default function ProblemSelection({ isClose, onClose, onSelectProblem, ro
                     </span>
                   ))}
                 </div>
-                <p className="text-neutral-500 text-sm truncate">{problem.description.substring(0, 100)}...</p>
+                <p className="text-neutral-500 text-sm truncuate">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                    {problem.description.substring(0, 100) + "..."}
+                  </ReactMarkdown>
+                </p>
               </div>
             ))}
           </div>
         )}
       </div>
+      <span className="pointer-events-none absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-neutral-900 to-transparent z-50" />
     </div>
   );
 }

@@ -8,7 +8,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
   const [remoteMicEnabled, setRemoteMicEnabled] = useState(false);
   const [remoteVidEnabled, setRemoteVidEnabled] = useState(false);
   const [peerConnectionReady, setPeerConnectionReady] = useState(false); // Tracks if remote peer is ready
-  const remoteVideoTrackRef = useRef(null); 
+  const remoteVideoTrackRef = useRef(null);
 
   const [localReady, setLocalReady] = useState(false);
   const [remoteReady, setRemoteReady] = useState(false);
@@ -26,7 +26,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
   const peerConnectionLocalRef = useRef(null);
   const peerConnectionRemoteRef = useRef(null);
   const peersConnectedRef = useRef(null);
-  
+
   const configuration = {
     iceServers: [
       {
@@ -62,7 +62,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
       roomId,
       userId: socket.id,
       mediaType: "video",
-      isOn: newVideoState
+      isOn: newVideoState,
     });
   };
 
@@ -76,37 +76,35 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
         currentUserRole: currentUserRole,
       });
     }
-
   };
 
   // Enable local video if it is not enabled.
   // If local video is already enabled, do nothing.
   const handleVideo = async () => {
-    if (videoRef.current && !videoRef.current.srcObject) {  
-        videoRef.current.srcObject = vidStream.current;
+    if (videoRef.current && !videoRef.current.srcObject) {
+      videoRef.current.srcObject = vidStream.current;
     }
 
     if (peerConnectionLocalRef.current && videoRef.current && videoRef.current.srcObject) {
-      const newVideoTrack = vidStream.current.getVideoTracks()[0]; 
+      const newVideoTrack = vidStream.current.getVideoTracks()[0];
       newVideoTrack.enabled = true;
 
-      let videoTransceiver = peerConnectionLocalRef.current.getTransceivers().find(t => t.sender && t.receiver.track?.kind === 'video')
+      let videoTransceiver = peerConnectionLocalRef.current.getTransceivers().find((t) => t.sender && t.receiver.track?.kind === "video");
       let sender = videoTransceiver.sender;
       if (sender) {
         if (sender.track !== newVideoTrack) {
-          console.log(newVideoTrack)
+          console.log(newVideoTrack);
           await sender.replaceTrack(newVideoTrack);
-          console.log(videoRef.current)
+          console.log(videoRef.current);
           console.log("✅ Replaced video track via transceiver sender");
         }
 
-        socket.emit("update_video", { roomId: roomId});
+        socket.emit("update_video", { roomId: roomId });
       } else {
         console.warn("⚠️ No available video transceiver/sender found");
       }
     }
   };
-  
 
   // Remote peer sends its own ice candidates to the other peer
   const handleIceRemotePeer = (event) => {
@@ -121,11 +119,10 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
       const role = message.currentUserRole;
 
       if (role == "localPeer" && peerConnectionRemoteRef.current) {
-        console.log("adding ice candidates as role Remote Peer")
+        console.log("adding ice candidates as role Remote Peer");
         await peerConnectionRemoteRef.current.addIceCandidate(message.candidates);
-      }
-      else if (role == "remotePeer" && peerConnectionLocalRef.current) {
-        console.log("adding ice candidates as role Local Peer")
+      } else if (role == "remotePeer" && peerConnectionLocalRef.current) {
+        console.log("adding ice candidates as role Local Peer");
         await peerConnectionLocalRef.current.addIceCandidate(message.candidates);
       }
     }
@@ -135,63 +132,62 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
   const trackHandler = async (event) => {
     console.log("📡 ontrack fired!", event.track.kind, event.track.id);
     let remoteStream = event.streams[0];
-    if (!remoteStream){
+    if (!remoteStream) {
       remoteStream = new MediaStream();
     }
- 
-    if (event.track.kind === 'audio'){
-      remoteStream.addTrack(event.track)
+
+    if (event.track.kind === "audio") {
+      remoteStream.addTrack(event.track);
       audioRef.current.srcObject = remoteStream;
 
       // Force play with fallback
       audioRef.current.play().catch((err) => {
         console.warn("Audio play blocked by browser:", err);
       });
-      console.log(audioRef.current)
-      console.log("AUDIO PLAYED BY RECEIVER")
-    }
-    else if (event.track.kind === 'video') {
-      remoteVideoTrackRef.current = event.track
+      console.log(audioRef.current);
+      console.log("AUDIO PLAYED BY RECEIVER");
+    } else if (event.track.kind === "video") {
+      remoteVideoTrackRef.current = event.track;
     }
   };
 
   const startMic = async () => {
     try {
-      console.log(peersConnectedRef.current)
-      if (!peersConnectedRef.current){
-        console.log("❌ Peer connection is not yet established")
+      console.log(peersConnectedRef.current);
+      if (!peersConnectedRef.current) {
+        console.log("❌ Peer connection is not yet established");
         return;
       }
 
       if (peerConnectionLocalRef.current) {
-        let audioTransceiver = peerConnectionLocalRef.current.getTransceivers().find(t => t.sender && t.receiver.track?.kind === 'audio');
+        let audioTransceiver = peerConnectionLocalRef.current.getTransceivers().find((t) => t.sender && t.receiver.track?.kind === "audio");
         let sender = audioTransceiver.sender;
         console.log(peerConnectionLocalRef.current.getTransceivers());
         console.log(audioTransceiver);
-  
+
         if (sender) {
           const newAudioTrack = micStream.current.getAudioTracks()[0];
           // Replace the track if needed
           if (sender.track !== newAudioTrack) {
             await sender.replaceTrack(newAudioTrack);
             console.log("✅ Replaced audio track via transceiver sender");
-            console.log(audioTransceiver)
+            console.log(audioTransceiver);
           }
         } else {
           console.warn("⚠️ No available audio transceiver/sender found");
         }
-  
+
         // if (
         //   peerConnectionLocalRef.current &&
         //   peerConnectionLocalRef.current.connectionState === "connected" &&
         //   peerConnectionLocalRef.current.iceConnectionState === "connected" &&
-        //   peerConnectionLocalRef.current.signalingState === "stable" && 
-        //   peerConnectionReady.current 
+        //   peerConnectionLocalRef.current.signalingState === "stable" &&
+        //   peerConnectionReady.current
         // ) {
         //   console.log("✅ Fully connected. Preparing renegotiation...");
-          // const offer = await peerConnectionLocalRef.current.createOffer();
-          // await peerConnectionLocalRef.current.setLocalDescription(offer);
-          // socket.emit("signal", { offer, roomId });
+        // const offer = await peerConnectionLocalRef.current.createOffer();
+        // await peerConnectionLocalRef.current.setLocalDescription(offer);
+        // socket.emit("signal", { offer, roomId });
         // } else {
         //   console.warn("⛔ Cannot renegotiate. State snapshot:", {
         //     connectionState: peerConnectionLocalRef.current?.connectionState,
@@ -204,10 +200,10 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
       console.error("Error in startMic:", error);
     }
   };
-  
+
   const initializePeerConnection = () => {
-    if (peerConnectionLocalRef.current){
-      console.log("PEER CONNECTION GETTING INITIALIZED...")
+    if (peerConnectionLocalRef.current) {
+      console.log("PEER CONNECTION GETTING INITIALIZED...");
       // Create an offer and send it to the other peer
       peerConnectionLocalRef.current.createOffer().then((offer) => {
         peerConnectionLocalRef.current.setLocalDescription(offer).then(() => {
@@ -215,7 +211,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
         });
       });
     }
-  }
+  };
 
   // Remote peers listens for offer from other peer
   const handleIncomingOffer = async (message) => {
@@ -234,12 +230,12 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
 
       // // Emit the answer to the signaling server
       socket.emit("signal", { answer, roomId });
-    };
-  }
+    }
+  };
 
-  // Resets peer connection 
+  // Resets peer connection
   const resetPeer = () => {
-    console.log("RESET PEER IS INVOKEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD")
+    console.log("RESET PEER IS INVOKEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
     if (peerConnectionLocalRef.current) {
       peerConnectionLocalRef.current.removeEventListener("icecandidate", handleIceLocalPeer);
       peerConnectionLocalRef.current.removeEventListener("connectionstatechange", connectionHandler);
@@ -278,44 +274,42 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
       // Peers are now connected
       console.log("peers connected!");
       peersConnectedRef.current = true;
-      console.log(peersConnectedRef.current)
+      console.log(peersConnectedRef.current);
 
       // If local participant has video/audio enabled, send media update for peer connection
       // if (isMicOn){
-        // Emit mic status change to other participants
-        socket.emit("media_state_change", {
-          roomId,
-          userId: socket.id,
-          mediaType: "audio",
-          isOn: isMicOn
-        });
+      // Emit mic status change to other participants
+      socket.emit("media_state_change", {
+        roomId,
+        userId: socket.id,
+        mediaType: "audio",
+        isOn: isMicOn,
+      });
       // }
 
       // if (isVideoOn){
-        // Emit mic status change to other participants
-        socket.emit("media_state_change", {
-          roomId,
-          userId: socket.id,
-          mediaType: "video",
-          isOn: isVideoOn
-        });
+      // Emit mic status change to other participants
+      socket.emit("media_state_change", {
+        roomId,
+        userId: socket.id,
+        mediaType: "video",
+        isOn: isVideoOn,
+      });
       // }
     }
   };
 
   useEffect(() => {
-    if (!peerConnectionReady) return; 
-    socket.emit("peer_ready", {roomId: roomId, isReady: true})
-  }, [peerConnectionReady])
+    if (!peerConnectionReady) return;
+    socket.emit("peer_ready", { roomId: roomId, isReady: true });
+  }, [peerConnectionReady]);
 
   // Local peer connection handshake
   // This runs whenever the local user toggles their own video
   useEffect(() => {
     const stopVideo = () => {
-      if (peerConnectionLocalRef.current){
-        const videoSender = peerConnectionLocalRef.current.getSenders().find(
-          sender => sender.track?.kind === 'video'
-        );
+      if (peerConnectionLocalRef.current) {
+        const videoSender = peerConnectionLocalRef.current.getSenders().find((sender) => sender.track?.kind === "video");
 
         if (videoSender) {
           try {
@@ -325,7 +319,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
           }
         }
       }
-    }
+    };
     if (isVideoOn) {
       console.log("video is on");
 
@@ -353,14 +347,12 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
   }, [socket]);
 
   useEffect(() => {
-    console.log("INSIDE AUDIO USEEFFECT, MIC sttus: " + isMicOn);  
+    console.log("INSIDE AUDIO USEEFFECT, MIC sttus: " + isMicOn);
     const stopMic = () => {
       let peerConnection = peerConnectionLocalRef.current;
       if (peerConnection) {
-        const audioSender = peerConnection.getSenders().find(
-          sender => sender.track?.kind === 'audio'
-        );
-  
+        const audioSender = peerConnection.getSenders().find((sender) => sender.track?.kind === "audio");
+
         if (audioSender) {
           try {
             audioSender.replaceTrack(null); // stop sending audio
@@ -370,7 +362,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
         }
       }
     };
-  
+
     if (isMicOn) {
       stopMic();
       startMic();
@@ -378,23 +370,22 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
       stopMic();
     }
   }, [isMicOn]);
-  
 
   useEffect(() => {
-    console.log(remoteVidRef.current)
-    console.log(videoRef.current)
-  }, [participants])
+    console.log(remoteVidRef.current);
+    console.log(videoRef.current);
+  }, [participants]);
   // Create peer connection before video/audio is/are enabled
   // Idea is that when video/audio is enabled, simply add tracks to the existing connection.
   useEffect(() => {
     // Do not establish peer connection if no other participants are in the room
     if (!participants.length) {
-      return; 
+      return;
     }
     const preparePeerConnection = () => {
-      // Make itself the remote peer role 
-      if (!peerConnectionRemoteRef.current){
-        peerConnectionRemoteRef.current = new RTCPeerConnection(configuration); 
+      // Make itself the remote peer role
+      if (!peerConnectionRemoteRef.current) {
+        peerConnectionRemoteRef.current = new RTCPeerConnection(configuration);
         peerConnectionRemoteRef.current.addEventListener("icecandidate", handleIceRemotePeer);
         peerConnectionRemoteRef.current.ontrack = trackHandler;
         // peerConnectionRemoteRef.current.addTransceiver("video", { direction: "recvonly" });
@@ -405,7 +396,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
           console.log("current peer connection status: ", peerConnectionRemoteRef.current.connectionState);
         });
       }
-              
+
       // Make itself the local peer role
       if (!peerConnectionLocalRef.current) {
         console.log("Discovered new participant, initializing peer connection...");
@@ -425,29 +416,29 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
         peerConnectionLocalRef.current.addEventListener("connectionstatechange", connectionHandler);
       }
       setLocalReady(true);
-      socket.emit("peer_connection_prepared", { roomId: roomId, ready: true })
-    }
-    
+      socket.emit("peer_connection_prepared", { roomId: roomId, ready: true });
+    };
+
     if (!peerConnectionLocalRef.current && !peerConnectionRemoteRef.current) {
       preparePeerConnection();
     }
 
-    if (localReady && remoteReady){
-      console.log("Local Ready: ", localReady)
-      console.log("Remote Ready: ", remoteReady)
+    if (localReady && remoteReady) {
+      console.log("Local Ready: ", localReady);
+      console.log("Remote Ready: ", remoteReady);
       initializePeerConnection();
     }
-    }, [participants.length, localReady, remoteReady])
+  }, [participants.length, localReady, remoteReady]);
 
   useEffect(() => {
-    if (!remoteMicEnabled) return; 
-    socket.emit("peer_ack", {roomId: roomId, audioAck: true})
-  }, [remoteMicEnabled])
+    if (!remoteMicEnabled) return;
+    socket.emit("peer_ack", { roomId: roomId, audioAck: true });
+  }, [remoteMicEnabled]);
 
   useEffect(() => {
-    if (!remoteVidEnabled) return; 
-    socket.emit("peer_ack", {roomId: roomId, videoAck: true})
-  }, [remoteVidEnabled])
+    if (!remoteVidEnabled) return;
+    socket.emit("peer_ack", { roomId: roomId, videoAck: true });
+  }, [remoteVidEnabled]);
 
   useEffect(() => {
     if (!socket || !roomId || !userName) return;
@@ -459,7 +450,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
     //     initializePeerConnection();
     //   }
 
-    //   // Add tracks 
+    //   // Add tracks
 
     // })
 
@@ -491,41 +482,39 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
         if (!remoteVidRef.current.srcObject) {
           remoteVidRef.current.srcObject = new MediaStream();
         }
-        
+
         // Clear existing tracks
-        remoteVidRef.current.srcObject.getTracks().forEach(track => {
+        remoteVidRef.current.srcObject.getTracks().forEach((track) => {
           remoteVidRef.current.srcObject.removeTrack(track);
         });
-        
+
         // Add new track
-        if (remoteVideoTrackRef.current){
+        if (remoteVideoTrackRef.current) {
           remoteVidRef.current.srcObject.addTrack(remoteVideoTrackRef.current);
-          remoteVidRef.current.play().catch(err => console.warn("Video play error:", err));
+          remoteVidRef.current.play().catch((err) => console.warn("Video play error:", err));
         }
       }
-    })
-    
+    });
+
     socket.on("peer_ack", (data) => {
       // On acknowledgement to audio, add tracks to existing, established peer connection
-      if (data.audioAck){
+      if (data.audioAck) {
         startMic();
       }
 
       // On acknowledgement to video, add tracks to existing, established peer connection
-      if (data.videoAck){
-        console.log(remoteVidRef.current)
+      if (data.videoAck) {
+        console.log(remoteVidRef.current);
         handleVideo();
       }
-    })
+    });
 
     socket.on("peer_connection_prepared", (data) => {
-      console.log("IS REMOTE PEER READY? " + data.ready)
-      if (data.ready)
-        setRemoteReady(true);
-    })
+      console.log("IS REMOTE PEER READY? " + data.ready);
+      if (data.ready) setRemoteReady(true);
+    });
 
     socket.on("incoming-offer", handleIncomingOffer);
-
 
     const allowMic = async () => {
       let stream = await navigator.mediaDevices.getUserMedia({
@@ -533,18 +522,18 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
           echoCancellation: true,
           noiseSuppression: true,
         },
-      });      
+      });
       micStream.current = stream;
-    }
+    };
 
     const allowVid = async () => {
       let stream = await navigator.mediaDevices.getUserMedia({
-       video: true,
-       audio: false
-      }); 
+        video: true,
+        audio: false,
+      });
       vidStream.current = stream;
-    }
-    
+    };
+
     // Listen for a new participant excluding itself that joined the room
     socket.on("participant_joined", (data) => {
       console.log("new participant: ", data);
@@ -630,7 +619,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
     // https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event
     const handleUnload = () => {
       resetPeer();
-      socket.emit("reset_peer", { roomId })
+      socket.emit("reset_peer", { roomId });
       socket.emit("leave_room", { roomId });
     };
     window.addEventListener("beforeunload", handleUnload);
@@ -639,20 +628,20 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
     allowVid();
 
     return () => {
-      socket.off("reset_peer")
+      socket.off("reset_peer");
       socket.off("incoming-answer");
-      socket.off("peer_connection_prepared")
+      socket.off("peer_connection_prepared");
       socket.off("incoming-offer");
       socket.off("peer_ack");
       socket.off("peer_ready");
       socket.off("participant_joined");
       socket.off("participants_list");
       socket.off("participant_left");
-      socket.off("media_state_update")
+      socket.off("media_state_update");
       socket.off("update_video");
       window.removeEventListener("beforeunload", handleUnload);
-    }
-  }, [userName, socket, roomId])
+    };
+  }, [userName, socket, roomId]);
 
   // Get the remote user (if any)
   const remoteUser = participants.length > 0 ? participants[0] : null;
@@ -694,10 +683,11 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
           )}
 
           {/* Local user info overlay */}
-          <div className="absolute bottom-2 left-2 text-neutral-500 font-medium bg-black/50 shadow px-2 py-1 rounded text-sm flex items-center gap-1 select-none">
+          <div className="absolute bottom-2 left-2 text-neutral-500 font-medium bg-black/50 shadow px-2 py-1 rounded-md text-sm flex items-center gap-1 select-none z-50">
             <span>{userName || "You"}</span>
             {!isMicOn && <MicOff className="size-3 ml-1 text-red-500" />}
           </div>
+          <span className="pointer-events-none absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-neutral-950 to-transparent z-40 rounded-b-l" />
         </div>
 
         {/* Remote User */}
@@ -718,11 +708,12 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
 
           {/* Remote user info overlay */}
           {remoteUser && (
-            <div className="absolute bottom-2 left-2 text-neutral-500 font-medium bg-black/50 shadow px-2 py-1 rounded text-sm flex items-center gap-1 select-none">
+            <div className="absolute bottom-2 left-2 text-neutral-500 font-medium bg-black/50 shadow px-2 py-1 rounded-md text-sm flex items-center gap-1 select-none z-50">
               <span>{remoteUser.userName || "Guest"}</span>
               {!remoteUser.isMicOn && <MicOff className="size-3 ml-1 text-red-500" />}
             </div>
           )}
+          <span className="pointer-events-none absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-neutral-950 to-transparent z-40" />
         </div>
       </div>
     </div>

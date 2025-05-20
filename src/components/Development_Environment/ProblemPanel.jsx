@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
@@ -35,17 +35,17 @@ export default function ProblemPanel({ selectedProblem, setSelectedProblem, room
     return () => {
       socket.off("problem_panel_synchronization", handleProblemPanelSync);
     };
-  }, [selectedProblem]);
+  }, [roomId, selectedProblem, setSelectedProblem, socket]);
 
   //function to determine difficulty class
   const getDifficultyClass = (difficulty) => {
     switch (difficulty) {
       case "Easy":
-        return "text-green-700 border-green-700/25 bg-green-700/25";
+        return "text-green-500 border-green-500/25 bg-green-700/10";
       case "Medium":
         return "text-[#EB5528] border-[#EB5528]/25 bg-[#EB5528]/10";
       case "Hard":
-        return "text-red-700 border-red-700/25 bg-red-700/25";
+        return "text-red-500 border-red-500/25 bg-red-700/10";
       default:
         return "text-neutral-600 border-neutral-800";
     }
@@ -62,7 +62,7 @@ export default function ProblemPanel({ selectedProblem, setSelectedProblem, room
         <h1 className="text-xl font-bold text-white">{problem.title}</h1>
         {selectedProblem && (
           <div className="flex flex-wrap gap-1">
-            <p className={`flex items-center px-2 text-sm font-medium rounded-full border shadow ${getDifficultyClass(problem.difficulty)}`}>{problem.difficulty}</p>
+            <p className={`flex items-center px-2 py-0.5 text-sm font-medium rounded-full border shadow ${getDifficultyClass(problem.difficulty)}`}>{problem.difficulty}</p>
             {selectedProblem &&
               problem.tags.map((tag, index) => (
                 <p key={index} className="flex items-center px-2 text-sm font-medium rounded-full border shadow text-neutral-600 border-neutral-800">
@@ -79,7 +79,7 @@ export default function ProblemPanel({ selectedProblem, setSelectedProblem, room
           <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
             {problem.description}
           </ReactMarkdown>
-          <p className="pt-4 opacity-25 select-none">codinginterview.me</p>
+          {selectedProblem && <p className="mt-4 pb-12 opacity-25 select-none italic">This problem was generated with the use of large language models.</p>}
         </div>
         <span className="pointer-events-none absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-editor to-transparent z-50" />
       </div>
