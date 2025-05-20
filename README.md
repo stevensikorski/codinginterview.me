@@ -1,97 +1,110 @@
-# Getting Started with Create React App
+# [codinginterview.me](https://codinginterview.me)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+[codinginterview.me](https://codinginterview.me) is a comprehensive web platform designed to simulate real coding interview experiences. By combining collaborative real-time code editing via Monaco Editor with WebRTC-powered video conferencing, our application allows users to practice technical interviews in an authentic environment. Built with React on the frontend and Express.js for the backend, our system features a curated library of coding challenges across difficulty levels, real-time code execution through Judge0 API, and synchronized code sharing via Socket.IO. Our platform supports interviewer and interviewee roles, providing a complete end-to-end solution for technical interview preparation, execution, and feedback.
 
-## Available Scripts
+## Technologies and Packages
 
-In the project directory, you can run:
+- Docker
+- Express.js
+- Figma
+- Firebase
+- GitHub
+- Google Cloud Platform
+- Judge0 API
+- Lucide React
+- Monaco Editor
+- Node.js
+- PostCSS
+- React
+- React Markdown
+- React Router
+- Socket.IO
+- Squarespace
+- Tailwind CSS
+- WebRTC
 
-### `npm start`
+## Install and Run
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```bash
+git clone https://github.com/stevensikorskicodinginterview.me.git
+cd codinginterview.me
+npm install
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```bash
+npm start
+```
 
-### `npm test`
+```bash
+node --env-file=./.env ./src/App.js
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Environment Variables
 
-### `npm run build`
+```env
+FIREBASE_SERVICE_KEY=
+REACT_APP_FIREBASE_API_KEY=
+REACT_APP_RAPIDAPI_KEY=
+REACT_APP_RAPIDAPI_HOST=
+REACT_APP_BACKEND_HOST=
+REACT_APP_FRONTEND_HOST=
+BACKEND_PORT=
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+FIREBASE_SERVICE_KEY:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```bash
+base64 firebase_service_account.json
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+REACT_APP_FIREBASE_API_KEY:
 
-### `npm run eject`
+```
+Firebase > Project Settings > Web API Key
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+REACT_APP_RAPIDAPI_KEY:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```
+RapidAPI > Console > Application > Application Key
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+REACT_APP_RAPIDAPI_HOST:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```
+judge0-ce.p.rapidapi.com
+```
 
-## Learn More
+REACT_APP_BACKEND_HOST:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```
+http://localhost:3002
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+REACT_APP_FRONTEND_HOST:
 
-### Code Splitting
+```
+http://localhost:3000
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+BACKEND_PORT:
 
-### Analyzing the Bundle Size
+```
+3002
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Deployment
 
-### Making a Progressive Web App
+### Frontend Deployment:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- **Firebase Hosting** is used to deploy the React frontend app
+- **GitHub Actions** is setup for the CI/CD
 
-### Advanced Configuration
+### Backend Deployment:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+- **Google Cloud Platform** via **Cloud Run** hosts the backend Express.js server
+- **Docker** is used to containerize the backend service
 
-### Deployment
+### Live Demo:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-
-HOW TO RUN THE PROJECT
-
-1. First, git clone the project into a directory
-2. Set environment variables in your .env file
-   GOOGLE_APPLICATION_CREDENTIALS="firebase_service_account.json"
-   REACT_APP_FIREBASE_API_KEY=<YOUR_FIREBASE_PROJECT_API_KEY>
-   BACKEND_PORT=3002
-   Note that the "firebase_service_account.json" file should be downloaded from the Firebase website.
-   You can find it on the top left in Project Overview --> Project settings --> Service accounts -->
-   Generate new private key. And then move this .json file to the root of the project directory.
-3. Install all dependencies (including new ones) by running in terminal 'npm install'
-4. Launch the frontend code 'npm start' in terminal
-5. Launch the backend code 'node --env-file=<PATH*TO*.ENV_FILE> <PATH_TO_APP.JS_FILE>'
-
-locally:
-docker build -t codinginterview-me .
-docker run -p 3002:3002 --env-file .env codinginterview-me
-
-deploying:
-docker buildx create --name multi-builder --use
-docker buildx inspect --bootstrap
-
-docker buildx build \
- --platform linux/amd64,linux/arm64 \
- -t northamerica-northeast1-docker.pkg.dev/codinginterview-me/codinginterview-me/codinginterview-me:latest \
- --push .
+The application is deployed and accessible at [codinginterview.me](https://codinginterview.me)
