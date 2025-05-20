@@ -8,6 +8,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
   const [remoteMicEnabled, setRemoteMicEnabled] = useState(false);
   const [remoteVidEnabled, setRemoteVidEnabled] = useState(false);
   const [peerConnectionReady, setPeerConnectionReady] = useState(false); // Tracks if remote peer is ready
+  const [hasJoined, setHasJoined] = useState(false);
   const remoteVideoTrackRef = useRef(null);
 
   const [localReady, setLocalReady] = useState(false);
@@ -655,65 +656,78 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
 
         {/* Media Control Buttons */}
         <div className="flex items-center px-1 gap-1">
-          <button className="my-1 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200" onClick={toggleMic}>
-            {isMicOn ? <Mic className="p-1 text-neutral-600" /> : <MicOff className="p-1 text-red-500" />}
-          </button>
-          <button className="my-1 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200" onClick={toggleVideo}>
-            {isVideoOn ? <Video className="p-1 text-neutral-600" /> : <VideoOff className="p-1 text-red-500" />}
-          </button>
+          {hasJoined && (
+            <button className="my-1 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200" onClick={toggleMic}>
+              {isMicOn ? <Mic className="p-1 text-neutral-600" /> : <MicOff className="p-1 text-red-500" />}
+            </button>
+          )}
+          {hasJoined && (
+            <button className="my-1 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200" onClick={toggleVideo}>
+              {isVideoOn ? <Video className="p-1 text-neutral-600" /> : <VideoOff className="p-1 text-red-500" />}
+            </button>
+          )}
           <button className="my-1 rounded-md bg-transparent hover:bg-neutral-600/50 transition duration-200" onClick={toggleOpen}>
             <ChevronDown className={`p-1 text-neutral-600 transition-transform duration-200 ${isOpen ? "rotate-0" : "rotate-180"}`} />
           </button>
         </div>
       </div>
 
-      {/* Participants Camera */}
-      <div className={`grid grid-cols-1 md:grid-cols-2 gap-[1px] bg-neutral-800 text-neutral-600 border-t border-neutral-800 transition-opacity duration-300 ${isOpen ? "" : "opacity-0 pointer-events-none h-0 overflow-hidden"}`}>
-        {/* Audio Elements for local and remote audio */}
-        <audio ref={audioRef} autoPlay className="hidden" />
+      <div className="relative">
+        {/* Participants Camera */}
+        <div className={`grid grid-cols-1 md:grid-cols-2 gap-[1px] bg-neutral-800 text-neutral-600 border-t border-neutral-800 transition-opacity duration-300 ${isOpen ? "" : "opacity-0 pointer-events-none h-0 overflow-hidden"}`}>
+          {/* Audio Elements for local and remote audio */}
+          <audio ref={audioRef} autoPlay className="hidden" />
 
-        {/* Local User */}
-        <div className="relative aspect-video bg-neutral-950 flex flex-col items-center justify-center">
-          {isVideoOn ? (
-            <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover" />
-          ) : (
-            <div className="flex items-center justify-center h-full w-full">
-              <VideoOff className="size-8 text-neutral-900" />
-            </div>
-          )}
-
-          {/* Local user info overlay */}
-          <div className="absolute bottom-2 left-2 text-neutral-500 font-medium bg-black/50 shadow px-2 py-1 rounded-md text-sm flex items-center gap-1 select-none z-50">
-            <span>{userName || "You"}</span>
-            {!isMicOn && <MicOff className="size-3 ml-1 text-red-500" />}
-          </div>
-          <span className="pointer-events-none absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-neutral-950 to-transparent z-40 rounded-b-l" />
-        </div>
-
-        {/* Remote User */}
-        <div className="relative aspect-video bg-neutral-950 flex flex-col items-center justify-center">
-          {remoteUser ? (
-            remoteUser.isVideoOn ? (
-              <video id={`video-${remoteUser.userId}`} ref={remoteVidRef} autoPlay muted playsInline className="w-full h-full object-cover" />
+          {/* Local User */}
+          <div className="relative aspect-video bg-neutral-950 flex flex-col items-center justify-center">
+            {isVideoOn ? (
+              <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover" />
             ) : (
               <div className="flex items-center justify-center h-full w-full">
                 <VideoOff className="size-8 text-neutral-900" />
               </div>
-            )
-          ) : (
-            <div className="flex items-center justify-center h-full w-full">
-              <User className="size-8 text-neutral-900" />
-            </div>
-          )}
+            )}
 
-          {/* Remote user info overlay */}
-          {remoteUser && (
-            <div className="absolute bottom-2 left-2 text-neutral-500 font-medium bg-black/50 shadow px-2 py-1 rounded-md text-sm flex items-center gap-1 select-none z-50">
-              <span>{remoteUser.userName || "Guest"}</span>
-              {!remoteUser.isMicOn && <MicOff className="size-3 ml-1 text-red-500" />}
+            {/* Local user info overlay */}
+            <div className="absolute bottom-2 left-2 text-neutral-500 font-medium bg-black/50 shadow px-2 py-1 rounded-md text-sm flex items-center gap-1 select-none z-40">
+              <span>{userName || "You"}</span>
+              {!isMicOn && <MicOff className="size-3 ml-1 text-red-500" />}
+            </div>
+            <span className="pointer-events-none absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-neutral-950 to-transparent z-30 rounded-b-l" />
+          </div>
+
+          {/* Remote User */}
+          <div className="relative aspect-video bg-neutral-950 flex flex-col items-center justify-center">
+            {remoteUser ? (
+              remoteUser.isVideoOn ? (
+                <video id={`video-${remoteUser.userId}`} ref={remoteVidRef} autoPlay muted playsInline className="w-full h-full object-cover" />
+              ) : (
+                <div className="flex items-center justify-center h-full w-full">
+                  <VideoOff className="size-8 text-neutral-900" />
+                </div>
+              )
+            ) : (
+              <div className="flex items-center justify-center h-full w-full">
+                <User className="size-8 text-neutral-900" />
+              </div>
+            )}
+
+            {/* Remote user info overlay */}
+            {remoteUser && (
+              <div className="absolute bottom-2 left-2 text-neutral-500 font-medium bg-black/50 shadow px-2 py-1 rounded-md text-sm flex items-center gap-1 select-none z-40">
+                <span>{remoteUser.userName || "Guest"}</span>
+                {!remoteUser.isMicOn && <MicOff className="size-3 ml-1 text-red-500" />}
+              </div>
+            )}
+            <span className="pointer-events-none absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-neutral-950 to-transparent z-30" />
+          </div>
+          {!hasJoined && isOpen && (
+            <div className="absolute inset-0 bg-neutral-950/30 backdrop-blur flex items-center justify-center rounded-b outline-1 outline-neutral-800 -mb-0.5 z-50">
+              <button onClick={() => setHasJoined(true)} className="px-4 py-2 rounded-md bg-neutral-900 border border-neutral-800 text-neutral-400 font-medium hover:bg-editor transition">
+                Join Call
+              </button>
             </div>
           )}
-          <span className="pointer-events-none absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-neutral-950 to-transparent z-40" />
         </div>
       </div>
     </div>

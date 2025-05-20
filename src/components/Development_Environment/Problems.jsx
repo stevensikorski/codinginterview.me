@@ -280,8 +280,8 @@ Output: 6
 
 Example 2:
 \`\`\`text
-Input: [1]
-Output: 1
+Input: [-1,-2,5,6,-3,2,-5,4]
+Output: 10
 \`\`\``,
     code: {
       python: `# Time Complexity:
