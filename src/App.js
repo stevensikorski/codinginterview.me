@@ -61,23 +61,22 @@ io.on("connection", (socket) => {
         console.log("non-interviewer joined room");
       }
       console.log("joined room id: ", socket.rooms);
-      socket.emit("bind_room_user", { 'status': 'Success' })
-    }
-    else {
-      console.log("Invalid session.")
-      socket.emit("bind_room_user", { 'status': 'Failed' })
+      socket.emit("bind_room_user", { status: "Success" });
+    } else {
+      console.log("Invalid session.");
+      socket.emit("bind_room_user", { status: "Failed" });
     }
   });
 
   // Get all users in a room
   socket.on("get_room_users", (msg) => {
-    console.log("received request to retrieve room users")
+    console.log("received request to retrieve room users");
     const { roomId } = msg;
     const room = io.sockets.adapter.rooms.get(roomId); // Get the room object
     const usersInRoom = room ? Array.from(room) : []; // Get all socket IDs in the room
 
-    console.log("Users in room")
-    console.log(usersInRoom)
+    console.log("Users in room");
+    console.log(usersInRoom);
     socket.emit("get_room_users", usersInRoom);
   });
 
@@ -86,6 +85,26 @@ io.on("connection", (socket) => {
     const { roomId, newCode } = msg;
     // Broadcast the updated code to all other users in the same room
     socket.broadcast.to(roomId).emit("synchronize_code", newCode);
+  });
+
+  socket.on("synchronize_language", (msg) => {
+    const { roomId, language } = msg;
+    // Broadcast the selected language to all other users in the same room
+    socket.broadcast.to(roomId).emit("synchronize_language", language);
+  });
+
+  // Sychronize editor notes for users in same room
+  socket.on("synchronize_notepad", (msg) => {
+    const { roomId, newNotes } = msg;
+    // Broadcast the updated code to all other users in the same room
+    socket.broadcast.to(roomId).emit("synchronize_notepad", newNotes);
+  });
+
+  // Sychronize editor terminal for users in same room
+  socket.on("synchronize_terminal", (msg) => {
+    const { roomId, terminalOutput } = msg;
+    // Broadcast the terminal output to all other users in the same room
+    socket.broadcast.to(roomId).emit("synchronize_terminal", terminalOutput);
   });
 
   // Synchronizes problem selection for users in same room
@@ -122,13 +141,13 @@ io.on("connection", (socket) => {
     };
 
     // Notify other users in the room that someone joined
-    console.log(socket.rooms)
+    console.log(socket.rooms);
     socket.to(roomId).emit("participant_joined", {
       userId: socket.id,
-      userName: socket.userData.userName
+      userName: socket.userData.userName,
     });
 
-    // Get all **other** participants in the room 
+    // Get all **other** participants in the room
     const participantsList = getParticipantsInRoom(roomId);
 
     // Send the current participant list of all **other** users to the newly joined user
@@ -137,15 +156,15 @@ io.on("connection", (socket) => {
   });
 
   // Checks if remote peer is ready for peer connection
-  // socket.on("peer_ready", (data) => {
-  //   console.log("peer message received")
-  //   const { roomId, ready } = data; 
-  //   socket.to(roomId).emit("peer_ready", { ready });
-  // })
+  socket.on("peer_ready", (data) => {
+    console.log("peer message received");
+    const { roomId, ready } = data;
+    socket.to(roomId).emit("peer_ready", { ready });
+  });
 
   // User leaves a room
   socket.on("leave_room", async (data) => {
-    console.log("received request to leave room")
+    console.log("received request to leave room");
     const { roomId } = data;
 
     if (socket.userData) {
@@ -180,7 +199,7 @@ io.on("connection", (socket) => {
     socket.to(roomId).emit("media_state_update", {
       userId: socket.id,
       mediaType,
-      isOn
+      isOn,
     });
   });
 
@@ -205,25 +224,24 @@ io.on("connection", (socket) => {
   socket.on("signal", (data) => {
     // The metadata will be one of three things: offer from caller, ice candidates, or answer to offer by receiver
     // For offer, send to other users in room
-    if (data.offer){
-      console.log("offer received: " + data.offer)
-      socket.to(data.roomId).emit("incoming-offer", { 'offer': data.offer })
+    if (data.offer) {
+      console.log("offer received: " + data.offer);
+      socket.to(data.roomId).emit("incoming-offer", { offer: data.offer });
     }
-    // For answer to offer 
-    else if (data.answer){
-      console.log("answer received: " + data.answer)
-      socket.to(data.roomId).emit("incoming-answer", { 'answer': data.answer })
+    // For answer to offer
+    else if (data.answer) {
+      console.log("answer received: " + data.answer);
+      socket.to(data.roomId).emit("incoming-answer", { answer: data.answer });
     }
     // For ice candidates
-    else if (data.candidates){
-      socket.to(data.roomId).emit("incoming-candidates", { 'candidates': data.candidates, 'currentUserRole': data.currentUserRole})
+    else if (data.candidates) {
+      socket.to(data.roomId).emit("incoming-candidates", { candidates: data.candidates, currentUserRole: data.currentUserRole });
     }
     // For closing peer connection
-    else if (data.closePeerConn){
-      socket.to(data.roomId).emit("close-peer", { 'closePeerConn': true })
+    else if (data.closePeerConn) {
+      socket.to(data.roomId).emit("close-peer", { closePeerConn: true });
     }
-  })
-
+  });
 
   // Handle disconnections
   // socket.on("disconnect", () => {
@@ -241,7 +259,7 @@ io.on("connection", (socket) => {
   // Helper function to get all participants in a room
   function getParticipantsInRoom(roomId) {
     const participants = [];
-    const room = io.sockets.adapter.rooms.get(roomId); 
+    const room = io.sockets.adapter.rooms.get(roomId);
     const seenParticipants = new Set();
 
     if (room) {
@@ -259,7 +277,7 @@ io.on("connection", (socket) => {
             userId: clientSocket.id,
             userName: clientSocket.userData.userName,
             isVideoOn: clientSocket.userData.isVideoOn,
-            isMicOn: clientSocket.userData.isMicOn
+            isMicOn: clientSocket.userData.isMicOn,
           });
         }
       });

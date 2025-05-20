@@ -694,7 +694,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
           )}
 
           {/* Local user info overlay */}
-          <div className="absolute bottom-2 left-2 text-neutral-500 bg-black/50 shadow px-2 py-1 rounded text-sm flex items-center gap-1 select-none">
+          <div className="absolute bottom-2 left-2 text-neutral-500 font-medium bg-black/50 shadow px-2 py-1 rounded text-sm flex items-center gap-1 select-none">
             <span>{userName || "You"}</span>
             {!isMicOn && <MicOff className="size-3 ml-1 text-red-500" />}
           </div>
@@ -718,7 +718,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
 
           {/* Remote user info overlay */}
           {remoteUser && (
-            <div className="absolute bottom-2 left-2 text-neutral-500 bg-black/50 shadow px-2 py-1 rounded text-sm flex items-center gap-1 select-none">
+            <div className="absolute bottom-2 left-2 text-neutral-500 font-medium bg-black/50 shadow px-2 py-1 rounded text-sm flex items-center gap-1 select-none">
               <span>{remoteUser.userName || "Guest"}</span>
               {!remoteUser.isMicOn && <MicOff className="size-3 ml-1 text-red-500" />}
             </div>

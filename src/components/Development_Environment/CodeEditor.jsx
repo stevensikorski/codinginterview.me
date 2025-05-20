@@ -10,13 +10,15 @@ const languages = [
   { key: "cpp", name: "C++", id: 54 },
 ];
 
-export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket }) {
+export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket, selectedProblem }) {
   const editorRef = useRef(null);
   const monacoRef = useRef(null);
 
   const [isOpen, setIsOpen] = useState(false);
   const [language, setLanguage] = useState("python");
-  const [code, setCode] = useState(StarterCode[language]);
+  const [code, setCode] = useState(() => {
+    return selectedProblem?.code?.[language] || "";
+  });
   const [position, setPosition] = useState({ line: 1, column: 1 });
 
   const [fontSize, setFontSize] = useState(14);
@@ -26,6 +28,18 @@ export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket
 
   const fontSizes = [10, 12, 14, 16, 18, 20];
   const tabSizes = [2, 4];
+
+  useEffect(() => {
+    // Update code when problem or language changes
+    const newCode = selectedProblem?.code?.[language] || "";
+    setCode(newCode);
+
+    // Reset tab size
+    setTabSize(4);
+    setTimeout(() => {
+      editorRef.current?.getModel()?.updateOptions({ tabSize: 4 });
+    }, 0);
+  }, [selectedProblem, language]);
 
   // Timeout function to automatically save and synchronize code
   const debounceTimeout = useRef(null);
@@ -48,6 +62,19 @@ export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket
       }
     }
   };
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleSynchronizedLanguage = (newLanguage) => {
+      setLanguage(newLanguage);
+    };
+
+    socket.on("synchronize_language", handleSynchronizedLanguage);
+    return () => {
+      socket.off("synchronize_language", handleSynchronizedLanguage);
+    };
+  }, [socket]);
 
   // Reflect incoming code changes to sychronize code
   useEffect(() => {
@@ -85,7 +112,7 @@ export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket
     return () => {
       socket.off("synchronize_code", handleSynchronizedCode);
     };
-  }, []);
+  }, [socket]);
 
   const rotateFontSize = () => {
     const nextIndex = (fontSizes.indexOf(fontSize) + 1) % fontSizes.length;
@@ -173,9 +200,28 @@ export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket
 
       const finalOutput = [result?.stdout, result?.stderr, result?.compile_output, result?.message, `[${result?.status?.description || "Unknown Status"}]`].filter(Boolean).join("\n\n") || "No output.";
 
+      // Emit the terminal output to all users in the room
+      if (socket && roomId) {
+        socket.emit("synchronize_terminal", {
+          roomId,
+          terminalOutput: finalOutput,
+        });
+      }
+
+      // Set the output for local display
       setCodeOutput(finalOutput);
     } catch (err) {
-      setCodeOutput("Error: " + err.message);
+      const errorOutput = "Error: " + err.message;
+
+      // Emit the error output to all users in the room
+      if (socket && roomId) {
+        socket.emit("synchronize_terminal", {
+          roomId,
+          terminalOutput: errorOutput,
+        });
+      }
+
+      setCodeOutput(errorOutput);
     }
   };
 
@@ -196,7 +242,7 @@ export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket
                 key={key}
                 onClick={() => {
                   setLanguage(key);
-                  setCode(StarterCode[key]);
+                  socket.emit("synchronize_language", { roomId, language: key });
                   setTabSize(4);
                   setTimeout(() => {
                     editorRef.current?.getModel()?.updateOptions({ tabSize });
