@@ -162,6 +162,16 @@ io.on("connection", (socket) => {
     socket.to(roomId).emit("peer_ready", { ready });
   });
 
+  socket.on("panel_join_notif", (data) => {
+    const roomId = data.roomId;
+    socket.to(roomId).emit("panel_join_notif", data)
+  })
+  
+  socket.on("panel_join_ack", (data) => {
+    const roomId = data.roomId;
+    socket.to(roomId).emit("panel_join_ack", data)
+  })
+
   // User leaves a room
   socket.on("leave_room", async (data) => {
     console.log("received request to leave room");
@@ -202,6 +212,19 @@ io.on("connection", (socket) => {
       isOn,
     });
   });
+
+  socket.on("peer_ack", (data) => {
+    socket.to(data.roomId).emit("peer_ack", data)
+  })
+
+  socket.on("update_video", (data) => {
+    socket.to(data.roomId).emit("update_video", data)
+  })
+
+  socket.on("peer_connection_prepared", (data) => {
+    console.log("peer connection prepared request")
+    socket.to(data.roomId).emit("peer_connection_prepared", data)
+  })
 
   // Handles WebRTC sending metadata to other party require for P2P connection (for video/audio streaming)
   socket.on("signal", (data) => {

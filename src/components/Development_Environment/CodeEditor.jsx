@@ -281,7 +281,6 @@ export default function CodeEditor({ setActiveTab, setCodeOutput, roomId, socket
           onChange={(value) => {
             console.log("ONCHANGED TRIEGGGERED");
             pushCodeUpdate();
-            // console.log("Code changed:", value);
             setCode(value || "");
             if (isOpen) setIsOpen(false);
           }}
