@@ -162,6 +162,16 @@ io.on("connection", (socket) => {
     socket.to(roomId).emit("peer_ready", { ready });
   });
 
+  socket.on("panel_join_notif", (data) => {
+    const roomId = data.roomId;
+    socket.to(roomId).emit("panel_join_notif", data)
+  })
+  
+  socket.on("panel_join_ack", (data) => {
+    const roomId = data.roomId;
+    socket.to(roomId).emit("panel_join_ack", data)
+  })
+
   // User leaves a room
   socket.on("leave_room", async (data) => {
     console.log("received request to leave room");
@@ -205,10 +215,6 @@ io.on("connection", (socket) => {
 
   socket.on("peer_ack", (data) => {
     socket.to(data.roomId).emit("peer_ack", data)
-  })
-
-  socket.on("reset_peer", (data) => {
-    socket.to(data.roomId).emit("reset_peer", data)
   })
 
   socket.on("update_video", (data) => {

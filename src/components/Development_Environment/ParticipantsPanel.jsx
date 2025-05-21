@@ -9,10 +9,13 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
   const [remoteVidEnabled, setRemoteVidEnabled] = useState(false);
   const [peerConnectionReady, setPeerConnectionReady] = useState(false); // Tracks if remote peer is ready
   const [hasJoined, setHasJoined] = useState(false);
+  const [hasRemoteJoined, setHasRemoteJoined] = useState(false);
   const remoteVideoTrackRef = useRef(null);
+  const hasJoinedRef = useRef(false);
 
   const [localReady, setLocalReady] = useState(false);
   const [remoteReady, setRemoteReady] = useState(false);
+
 
   // DOM elements
   const videoRef = useRef(null);
@@ -142,14 +145,19 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
       audioRef.current.srcObject = remoteStream;
 
       // Force play with fallback
-      audioRef.current.play().catch((err) => {
-        console.warn("Audio play blocked by browser:", err);
-      });
+      // audioRef.current.play().catch((err) => {
+      //   console.warn("Audio play blocked by browser:", err);
+      // });
       console.log(audioRef.current);
       console.log("AUDIO PLAYED BY RECEIVER");
     } else if (event.track.kind === "video") {
       remoteVideoTrackRef.current = event.track;
     }
+  };
+
+  const handleJoin = () => {
+    setHasJoined(true);         // Update state (for UI re-render)
+    hasJoinedRef.current = true; // Update ref (for immediate access in handlers)
   };
 
   const startMic = async () => {
@@ -262,7 +270,15 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
 
     setLocalReady(false);
     setRemoteReady(false);
+    setHasRemoteJoined(false);
   };
+
+  const playRemoteAudio = () => {
+    console.log("AUDIO IS PLAYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYED")
+    if (audioRef.current.srcObject) {
+      audioRef.current.play().catch(console.warn);
+    }
+  }
 
   // Named event handler to handle forwarding local ICE candidates to signaling server
   const handleIceLocalPeer = (event) => {
@@ -429,7 +445,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
       console.log("Remote Ready: ", remoteReady);
       initializePeerConnection();
     }
-  }, [participants.length, localReady, remoteReady]);
+  }, [participants.length, localReady, remoteReady, hasJoined]);
 
   useEffect(() => {
     if (!remoteMicEnabled) return;
@@ -443,25 +459,6 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
 
   useEffect(() => {
     if (!socket || !roomId || !userName) return;
-
-    // socket.on("peer_ready", (data) => {
-    //   console.log("PEER IS READY: ", data.isReady)
-    //   // If peer connection is not established, create it
-    //   if (!peerConnectionLocalRef.current && !peerConnectionRemoteRef.current){
-    //     initializePeerConnection();
-    //   }
-
-    //   // Add tracks
-
-    // })
-
-    // socket.on("reset_peer", (data) => {
-    //   console.log(peerConnectionLocalRef.current, peerConnectionRemoteRef.current)
-    //   console.log("RECEIVED REQUEST TO RESET PEERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
-    //   resetPeer();
-    //   console.log(peerConnectionLocalRef.current, peerConnectionRemoteRef.current)
-    // })
-
     // Listen for answer to offer by the other peer
     socket.on("incoming-answer", (message) => {
       console.log("incoming answer received in frontend");
@@ -615,12 +612,33 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
       });
     });
 
+    // Acknowlegement response to a user who has joined the panel
+    socket.on("panel_join_ack", (data) => {
+      console.log("panel_join_ack, acknowledgement received: ", data.joinAck)
+      if (data.joinAck) {
+        setHasRemoteJoined(true);
+      }
+    })
+
+    // Notification that remote peer has joined the panel
+    socket.on("panel_join_notif", (data) => {
+      console.log("panel_join_notif, remote peer has joined: ", data.joined)
+      console.log("current HasLocalJoined:", hasJoinedRef.current)
+      console.log("current HasRemoteJoined: ", hasRemoteJoined)
+
+      // If remote says it has joined and local has already joined, send back acknowledgement
+      if (data.joined && hasJoinedRef.current){
+        console.log("setting hasremotejoined to true")
+        setHasRemoteJoined(true);
+        socket.emit("panel_join_ack", {roomId:roomId, joinAck: true})
+      }
+    })
+
     // If user's tab is closed, React cannot guarantee to re-render child components
     // So, let the browser notify the backend about the disconnection and let it notify other users
     // https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event
     const handleUnload = () => {
-      resetPeer();
-      socket.emit("reset_peer", { roomId });
+      // resetPeer();
       socket.emit("leave_room", { roomId });
     };
     window.addEventListener("beforeunload", handleUnload);
@@ -629,7 +647,8 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
     allowVid();
 
     return () => {
-      socket.off("reset_peer");
+      socket.off("panel_join_notif");
+      socket.off("panel_join_ack");
       socket.off("incoming-answer");
       socket.off("peer_connection_prepared");
       socket.off("incoming-offer");
@@ -642,7 +661,28 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
       socket.off("update_video");
       window.removeEventListener("beforeunload", handleUnload);
     };
-  }, [userName, socket, roomId]);
+  }, [socket, roomId, userName]);
+
+  useEffect(() => {
+    if (!participants.length) return;
+    console.log("INSIDE SPECIAL USEEFFECT: ", hasJoined, hasRemoteJoined)
+    // If local user and remote user have not joined, do not enable remote audio
+    if (!hasJoined && !hasRemoteJoined) return; 
+
+    if (participants.length){
+      // If both users have joined, enable their respective remote audio
+      if (hasJoined && hasRemoteJoined) {
+        console.log("Remote has joined, local has joined, enabling remote audio")
+        playRemoteAudio();
+        return;
+      }
+      // If local user has joined but remote hasn't, notify the remote peer 
+      else if (hasJoined && !hasRemoteJoined) {
+        socket.emit("panel_join_notif", {roomId:roomId, joined: true})
+        return;
+      }
+    }
+  }, [hasJoined, hasRemoteJoined, participants.length])
 
   // Get the remote user (if any)
   const remoteUser = participants.length > 0 ? participants[0] : null;
@@ -676,7 +716,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
         {/* Participants Camera */}
         <div className={`grid grid-cols-1 md:grid-cols-2 gap-[1px] bg-neutral-800 text-neutral-600 border-t border-neutral-800 transition-opacity duration-300 ${isOpen ? "" : "opacity-0 pointer-events-none h-0 overflow-hidden"}`}>
           {/* Audio Elements for local and remote audio */}
-          <audio ref={audioRef} autoPlay className="hidden" />
+          <audio ref={audioRef} className="hidden" />
 
           {/* Local User */}
           <div className="relative aspect-video bg-neutral-950 flex flex-col items-center justify-center">
@@ -723,7 +763,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
           </div>
           {!hasJoined && isOpen && (
             <div className="absolute inset-0 bg-neutral-950/30 backdrop-blur flex items-center justify-center rounded-b outline-1 outline-neutral-800 -mb-0.5 z-50">
-              <button onClick={() => setHasJoined(true)} className="px-4 py-2 rounded-md bg-neutral-900 border border-neutral-800 text-neutral-400 font-medium hover:bg-editor transition">
+              <button onClick={handleJoin} className="px-4 py-2 rounded-md bg-neutral-900 border border-neutral-800 text-neutral-400 font-medium hover:bg-editor transition">
                 Join Call
               </button>
             </div>
