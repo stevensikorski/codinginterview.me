@@ -16,6 +16,39 @@ const host = process.env.IP || "0.0.0.0";
 // Handles user account registration
 registerUserRoutes(app);
 
+app.get("/rooms/:id/validate", async (req, res) => {
+  const roomId = req.params.id;
+  const session = await getSession(roomId);
+
+  // Invalid session
+  if (!session) {
+    res.status(400).json({
+      success: false,
+      message: "Bad Request: Invalid room identifier.",
+    });
+    return;
+  }
+
+  // Check room capacity using Socket.io
+  const room = io.sockets.adapter.rooms.get(roomId);
+  const participantCount = room ? room.size : 0;
+
+  if (participantCount >= 2) {
+    // Room is full
+    res.status(403).json({
+      success: false,
+      message: "Room is full (maximum 2 participants).",
+    });
+    return;
+  }
+
+  // Valid session with space
+  res.status(200).json({
+    success: true,
+    message: "Valid Room.",
+  });
+});
+
 // Listen for socket connection
 io.on("connection", (socket) => {
   console.log("a user has connected");
@@ -44,13 +77,20 @@ io.on("connection", (socket) => {
     const uid = msg.uid;
     const roomId = msg.roomId;
 
-    // Remove the socket from its own `socket.id` room (the default behavior in Socket.io)
-    await socket.join(roomId);
-
-    // User is either an interviewer or not an interviewer but all users
-    // must be authenticated already
+    // Check if room exists
     const session = await getSession(roomId);
     if (session) {
+      // Check if room is full (has 2 participants already)
+      const room = io.sockets.adapter.rooms.get(roomId);
+      const participantCount = room ? room.size : 0;
+
+      if (participantCount >= 2 && !room.has(socket.id)) {
+        // Room is full, reject join request
+        socket.emit("bind_room_user", { status: "Failed", reason: "Room is full (maximum 2 participants)" });
+        return;
+      }
+
+      // Room has space or user is already in the room
       if (session.sessionCreatorId === uid) {
         // Interviewer
         await socket.join(roomId);
@@ -64,7 +104,7 @@ io.on("connection", (socket) => {
       socket.emit("bind_room_user", { status: "Success" });
     } else {
       console.log("Invalid session.");
-      socket.emit("bind_room_user", { status: "Failed" });
+      socket.emit("bind_room_user", { status: "Failed", reason: "Invalid session" });
     }
   });
 
@@ -164,13 +204,13 @@ io.on("connection", (socket) => {
 
   socket.on("panel_join_notif", (data) => {
     const roomId = data.roomId;
-    socket.to(roomId).emit("panel_join_notif", data)
-  })
-  
+    socket.to(roomId).emit("panel_join_notif", data);
+  });
+
   socket.on("panel_join_ack", (data) => {
     const roomId = data.roomId;
-    socket.to(roomId).emit("panel_join_ack", data)
-  })
+    socket.to(roomId).emit("panel_join_ack", data);
+  });
 
   // User leaves a room
   socket.on("leave_room", async (data) => {
@@ -214,17 +254,17 @@ io.on("connection", (socket) => {
   });
 
   socket.on("peer_ack", (data) => {
-    socket.to(data.roomId).emit("peer_ack", data)
-  })
+    socket.to(data.roomId).emit("peer_ack", data);
+  });
 
   socket.on("update_video", (data) => {
-    socket.to(data.roomId).emit("update_video", data)
-  })
+    socket.to(data.roomId).emit("update_video", data);
+  });
 
   socket.on("peer_connection_prepared", (data) => {
-    console.log("peer connection prepared request")
-    socket.to(data.roomId).emit("peer_connection_prepared", data)
-  })
+    console.log("peer connection prepared request");
+    socket.to(data.roomId).emit("peer_connection_prepared", data);
+  });
 
   // Handles WebRTC sending metadata to other party require for P2P connection (for video/audio streaming)
   socket.on("signal", (data) => {

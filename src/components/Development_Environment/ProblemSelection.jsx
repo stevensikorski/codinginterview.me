@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X, Search, ShieldUser } from "lucide-react";
+import { X, Search, ShieldBan } from "lucide-react";
 import Spinner from "../shared/Spinner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -52,9 +52,9 @@ export default function ProblemSelection({ isClose, onClose, onSelectProblem, ro
   if (!authorizedUser) {
     return (
       <div className="bg-neutral-900 h-screen w-screen flex flex-col items-center justify-center">
-        <ShieldUser className="size-14 text-neutral-700" />
-        <h2 className="text-neutral-700 text-3xl font-semibold mt-2">Problem Selection Page</h2>
-        <p className="text-neutral-700 font-medium">Interviewers have access to this.</p>
+        <ShieldBan className="size-14 text-neutral-700" />
+        <h2 className="text-neutral-700 text-3xl font-semibold mt-2">Access Denied</h2>
+        <p className="text-neutral-700 font-medium">The page is restricted to interviewers.</p>
       </div>
     );
   }
@@ -112,7 +112,7 @@ export default function ProblemSelection({ isClose, onClose, onSelectProblem, ro
       </div>
 
       {/*problem list*/}
-      <div className="flex-grow overflow-y-auto pr-1 -mr-1 pt-0.5 pb-8">
+      <div className="flex-grow overflow-y-scroll [&::-webkit-scrollbar]:w-0 pr-1 -mr-1 pt-0.5 pb-16">
         {filteredProblems.length === 0 ? (
           <div className="text-center text-neutral-500 my-8">No problems match your search.</div>
         ) : (
@@ -138,7 +138,7 @@ export default function ProblemSelection({ isClose, onClose, onSelectProblem, ro
           </div>
         )}
       </div>
-      <span className="pointer-events-none absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-neutral-900 to-transparent z-50" />
+      <span className="pointer-events-none absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-neutral-900 to-transparent z-50" />
     </div>
   );
 }

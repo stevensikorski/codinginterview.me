@@ -6,6 +6,7 @@ import { io } from "socket.io-client";
 // Components
 import DevelopmentEnvironmentPage from "../Development_Environment/EditorPage";
 import Spinner from "../shared/Spinner";
+import { ShieldBan } from "lucide-react";
 
 // This component represents a room in which participants join
 // All sockets are initialized here and disconnected here
@@ -15,6 +16,7 @@ function Room() {
   const [isLoading, setIsLoading] = useState(true);
   const [isValidRoom, setIsValidRoom] = useState(false);
   const [isSocketConnected, setIsSocketConnected] = useState(false);
+  const [roomError, setRoomError] = useState(null);
 
   const socketRef = useRef(null);
   useEffect(() => {
@@ -28,14 +30,18 @@ function Room() {
     const validateCurrentRoom = async () => {
       // Fetch the room data using the ID;
       const response = await fetch(`${process.env.REACT_APP_BACKEND_HOST}/rooms/${roomId}/validate`);
-      console.log(response);
-      // HTTP Code 200 (OK)
+
       if (response.ok) {
         // Room is valid
         setIsValidRoom(true);
       } else {
-        // Room is valid
+        // Room is invalid or full
+        const errorData = await response.json();
+        setRoomError(errorData.message);
+        setIsValidRoom(false);
       }
+
+      setIsLoading(false);
     };
 
     // For user validation in room, use socket
@@ -44,7 +50,9 @@ function Room() {
         console.log("Room successfully bound to user");
         socketRef.current.emit("get_room_users", { roomId: roomId });
       } else {
-        console.log("Room failed to bound to user");
+        console.log("Room failed to bound to user:", message.reason);
+        setRoomError(message.reason);
+        setIsLoading(false);
       }
     };
 
@@ -85,10 +93,12 @@ function Room() {
 
   if (isLoading) return <Spinner />;
 
-  if (!isValidRoom)
+  if (!isValidRoom || roomError)
     return (
-      <div className="bg-neutral-900 h-screen w-screen flex items-center justify-center">
-        <h1>Unauthorized.</h1>
+      <div className="bg-neutral-900 h-screen w-screen flex flex-col items-center justify-center">
+        <ShieldBan className="size-14 text-neutral-700" />
+        <h2 className="text-neutral-700 text-3xl font-semibold mt-2">Access Denied</h2>
+        <p className="text-neutral-700 font-medium">The room is already full.</p>
       </div>
     );
   else return <DevelopmentEnvironmentPage roomId={roomId} socket={socketRef.current} socketState={isSocketConnected} />;

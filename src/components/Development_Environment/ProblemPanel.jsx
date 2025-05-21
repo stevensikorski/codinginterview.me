@@ -79,9 +79,9 @@ export default function ProblemPanel({ selectedProblem, setSelectedProblem, room
           <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
             {problem.description}
           </ReactMarkdown>
-          {selectedProblem && <p className="mt-4 pb-12 opacity-25 select-none italic">This problem was generated with the use of large language models.</p>}
+          {selectedProblem && <p className="mt-4 pb-16 opacity-25 select-none italic">This problem was generated with the use of large language models.</p>}
         </div>
-        <span className="pointer-events-none absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-editor to-transparent z-50" />
+        <span className="pointer-events-none absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-editor to-transparent z-50 rounded-b-lg" />
       </div>
     </div>
   );
