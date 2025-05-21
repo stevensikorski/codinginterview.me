@@ -15,8 +15,6 @@ const startAsInterviewer = async (socket, setShowLinkBox, setRoomLink, linkShown
   // Navigate to problem selection
   try {
     const handleRoomCreation = (roomPath) => {
-      console.log("called");
-      console.log("Room path from backend: ", roomPath);
       setRoomLink(roomPath);
       setShowLinkBox(true);
       linkShownRef.current = true;
@@ -53,7 +51,6 @@ export default function AuthenticatedPage() {
   useEffect(() => {
     const checkEmailVerification = async () => {
       const status = await isEmailVerified();
-      console.log(status);
     };
     checkEmailVerification();
 
@@ -78,7 +75,6 @@ export default function AuthenticatedPage() {
     e.preventDefault();
     const form = new FormData(e.target);
     const link = form.get("redirect_link");
-    console.log(link);
     if (link) {
       window.open(link, "_blank");
     } else {

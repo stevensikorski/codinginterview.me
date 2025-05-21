@@ -30,7 +30,7 @@ function App() {
       path: '/createsession'
     })
     
-    sock.on("bind_room_user", () => console.log("DO NOT LOG THIS"))
+    sock.on("bind_room_user", () => 0)
     sock.on("connect", () => {
       sock.emit("bind_room_user", {'roomId': "tester1234"})
     })
@@ -51,7 +51,6 @@ function App() {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
   
-  console.log(isLoginModalOpen);
   useEffect(() => {
     if (isLoginModalOpen === true) {
       const authState = async () => {
@@ -64,20 +63,17 @@ function App() {
 
   //opens login popup when "sign in" button is clicked
   function handleOpenLoginButtonClick() {
-    console.log("User clicked to open login");
     // Set to current state to force authentication check in useEffect
     setIsLoginModalOpen(true);
   }
 
   //closes login popup when X button is clicked
   function handleCloseLoginModal() {
-    console.log("User closed login");
     setIsLoginModalOpen(false);
   }
 
   //opens register popup when "Give it a try" button is clicked
   function handleOpenRegisterButtonClick() {
-    console.log("User clicked to register");
     setIsRegisterModalOpen(true);
   }
 

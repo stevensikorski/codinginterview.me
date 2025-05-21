@@ -28,7 +28,6 @@ function Room() {
     const validateCurrentRoom = async () => {
       // Fetch the room data using the ID;
       const response = await fetch(`${process.env.REACT_APP_BACKEND_HOST}/rooms/${roomId}/validate`);
-      console.log(response);
       // HTTP Code 200 (OK)
       if (response.ok) {
         // Room is valid
@@ -41,7 +40,6 @@ function Room() {
     // For user validation in room, use socket
     const handleBindRoomUsers = (message) => {
       if (message.status === "Success") {
-        console.log("Room successfully bound to user");
         socketRef.current.emit("get_room_users", { roomId: roomId });
       } else {
         console.log("Room failed to bound to user");
@@ -49,7 +47,6 @@ function Room() {
     };
 
     const handleGetRoomUsers = (response) => {
-      console.log(`Users in room ${roomId}: ${response}`);
       setIsLoading(false);
     };
 
@@ -65,13 +62,11 @@ function Room() {
     socketRef.current.on("bind_room_user", handleBindRoomUsers);
     socketRef.current.on("get_room_users", handleGetRoomUsers);
     socketRef.current.on("connect", async () => {
-      console.log("socket connected");
       setIsSocketConnected(true);
       await validateCurrentRoom();
       await bindRoomUser();
     });
     socketRef.current.on("disconnect", () => {
-      console.log("socket disconnected");
       setIsSocketConnected(false);
     });
 
@@ -79,7 +74,6 @@ function Room() {
       socketRef.current.removeAllListeners();
       socketRef.current.disconnect();
       socketRef.current = null;
-      console.log("cleaned");
     };
   }, []);
 
