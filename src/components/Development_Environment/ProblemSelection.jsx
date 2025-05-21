@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X, Search, ShieldUser } from "lucide-react";
+import { X, Search, ShieldBan } from "lucide-react";
 import Spinner from "../shared/Spinner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -52,7 +52,7 @@ export default function ProblemSelection({ isClose, onClose, onSelectProblem, ro
   if (!authorizedUser) {
     return (
       <div className="bg-neutral-900 h-screen w-screen flex flex-col items-center justify-center">
-        <ShieldUser className="size-14 text-neutral-700" />
+        <ShieldBan className="size-14 text-neutral-700" />
         <h2 className="text-neutral-700 text-3xl font-semibold mt-2">Problem Selection Page</h2>
         <p className="text-neutral-700 font-medium">Interviewers have access to this.</p>
       </div>
