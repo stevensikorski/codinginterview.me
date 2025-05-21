@@ -761,7 +761,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
             <span className="pointer-events-none absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-neutral-950 to-transparent z-30" />
           </div>
           {!hasJoined && isOpen && (
-            <div className="absolute inset-0 bg-neutral-950/30 backdrop-blur flex items-center justify-center rounded-b outline-1 outline-neutral-800 -mb-0.5 z-50">
+            <div className="absolute inset-0 bg-neutral-950/30 backdrop-blur-md flex items-center justify-center rounded-b outline-1 outline-neutral-800 -mb-0.5 z-50">
               <button onClick={handleJoin} className="px-4 py-2 rounded-md bg-neutral-900 border border-neutral-800 text-neutral-400 font-medium hover:bg-editor transition">
                 Join Call
               </button>
