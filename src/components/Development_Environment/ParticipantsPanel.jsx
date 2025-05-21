@@ -16,7 +16,6 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
   const [localReady, setLocalReady] = useState(false);
   const [remoteReady, setRemoteReady] = useState(false);
 
-
   // DOM elements
   const videoRef = useRef(null);
   const audioRef = useRef(null);
@@ -156,7 +155,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
   };
 
   const handleJoin = () => {
-    setHasJoined(true);         // Update state (for UI re-render)
+    setHasJoined(true); // Update state (for UI re-render)
     hasJoinedRef.current = true; // Update ref (for immediate access in handlers)
   };
 
@@ -274,11 +273,11 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
   };
 
   const playRemoteAudio = () => {
-    console.log("AUDIO IS PLAYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYED")
+    console.log("AUDIO IS PLAYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYED");
     if (audioRef.current.srcObject) {
       audioRef.current.play().catch(console.warn);
     }
-  }
+  };
 
   // Named event handler to handle forwarding local ICE candidates to signaling server
   const handleIceLocalPeer = (event) => {
@@ -614,25 +613,25 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
 
     // Acknowlegement response to a user who has joined the panel
     socket.on("panel_join_ack", (data) => {
-      console.log("panel_join_ack, acknowledgement received: ", data.joinAck)
+      console.log("panel_join_ack, acknowledgement received: ", data.joinAck);
       if (data.joinAck) {
         setHasRemoteJoined(true);
       }
-    })
+    });
 
     // Notification that remote peer has joined the panel
     socket.on("panel_join_notif", (data) => {
-      console.log("panel_join_notif, remote peer has joined: ", data.joined)
-      console.log("current HasLocalJoined:", hasJoinedRef.current)
-      console.log("current HasRemoteJoined: ", hasRemoteJoined)
+      console.log("panel_join_notif, remote peer has joined: ", data.joined);
+      console.log("current HasLocalJoined:", hasJoinedRef.current);
+      console.log("current HasRemoteJoined: ", hasRemoteJoined);
 
       // If remote says it has joined and local has already joined, send back acknowledgement
-      if (data.joined && hasJoinedRef.current){
-        console.log("setting hasremotejoined to true")
+      if (data.joined && hasJoinedRef.current) {
+        console.log("setting hasremotejoined to true");
         setHasRemoteJoined(true);
-        socket.emit("panel_join_ack", {roomId:roomId, joinAck: true})
+        socket.emit("panel_join_ack", { roomId: roomId, joinAck: true });
       }
-    })
+    });
 
     // If user's tab is closed, React cannot guarantee to re-render child components
     // So, let the browser notify the backend about the disconnection and let it notify other users
@@ -665,24 +664,24 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
 
   useEffect(() => {
     if (!participants.length) return;
-    console.log("INSIDE SPECIAL USEEFFECT: ", hasJoined, hasRemoteJoined)
+    console.log("INSIDE SPECIAL USEEFFECT: ", hasJoined, hasRemoteJoined);
     // If local user and remote user have not joined, do not enable remote audio
-    if (!hasJoined && !hasRemoteJoined) return; 
+    if (!hasJoined && !hasRemoteJoined) return;
 
-    if (participants.length){
+    if (participants.length) {
       // If both users have joined, enable their respective remote audio
       if (hasJoined && hasRemoteJoined) {
-        console.log("Remote has joined, local has joined, enabling remote audio")
+        console.log("Remote has joined, local has joined, enabling remote audio");
         playRemoteAudio();
         return;
       }
-      // If local user has joined but remote hasn't, notify the remote peer 
+      // If local user has joined but remote hasn't, notify the remote peer
       else if (hasJoined && !hasRemoteJoined) {
-        socket.emit("panel_join_notif", {roomId:roomId, joined: true})
+        socket.emit("panel_join_notif", { roomId: roomId, joined: true });
         return;
       }
     }
-  }, [hasJoined, hasRemoteJoined, participants.length])
+  }, [hasJoined, hasRemoteJoined, participants.length]);
 
   // Get the remote user (if any)
   const remoteUser = participants.length > 0 ? participants[0] : null;
@@ -691,7 +690,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
 
   return (
     <div className="flex flex-none flex-col rounded-lg border shadow bg-editor border-neutral-800 overflow-hidden">
-      <div className="flex flex-row justify-between items-center bg-neutral-900">
+      <div className="flex flex-row justify-between items-center bg-neutral-900 border-b border-neutral-800">
         <p className="p-1 px-2 font-semibold text-neutral-600">Participants</p>
 
         {/* Media Control Buttons */}
@@ -714,7 +713,7 @@ export default function ParticipantsPanel({ isOpen, toggleOpen, userName, socket
 
       <div className="relative">
         {/* Participants Camera */}
-        <div className={`grid grid-cols-1 md:grid-cols-2 gap-[1px] bg-neutral-800 text-neutral-600 border-t border-neutral-800 transition-opacity duration-300 ${isOpen ? "" : "opacity-0 pointer-events-none h-0 overflow-hidden"}`}>
+        <div className={`grid grid-cols-1 md:grid-cols-2 gap-[1px] bg-neutral-800 text-neutral-600 transition-opacity duration-300 ${isOpen ? "" : "opacity-0 pointer-events-none h-0 overflow-hidden"}`}>
           {/* Audio Elements for local and remote audio */}
           <audio ref={audioRef} className="hidden" />
 
