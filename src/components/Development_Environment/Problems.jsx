@@ -437,7 +437,7 @@ public:
     title: "Meeting Rooms II",
     tags: ["List", "Sorting", "Priority Queue", "Greedy"],
     difficulty: "Hard",
-    description: `Given an array of meeting time intervals \`intervals\` where each interval is a two-element array \`[start, end]\`, determine the minimum number of conference rooms required so that all meetings can take place without overlapping.
+    description: `Given an array of meeting time \`intervals\` where each interval is a two-element array \`[start, end]\`, determine the minimum number of conference rooms required so that all meetings can take place without overlapping.
 
 Example 1:
 \`\`\`text
