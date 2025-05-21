@@ -54,7 +54,7 @@ export default function ProblemSelection({ isClose, onClose, onSelectProblem, ro
       <div className="bg-neutral-900 h-screen w-screen flex flex-col items-center justify-center">
         <ShieldBan className="size-14 text-neutral-700" />
         <h2 className="text-neutral-700 text-3xl font-semibold mt-2">Access Denied</h2>
-        <p className="text-neutral-700 font-medium">Interviewers have access to this.</p>
+        <p className="text-neutral-700 font-medium">The page is restricted to interviewers.</p>
       </div>
     );
   }
