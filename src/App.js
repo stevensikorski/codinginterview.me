@@ -51,9 +51,6 @@ app.get("/rooms/:id/validate", async (req, res) => {
 
 // Listen for socket connection
 io.on("connection", (socket) => {
-  console.log("a user has connected");
-  console.log("Total sockets:", io.engine.clientsCount);
-
   // Handles room creation
   socket.on("createroom", async (msg) => {
     const { uid, jwtToken } = msg;
@@ -61,12 +58,10 @@ io.on("connection", (socket) => {
     // Perform some authorization checks
     await verifyJWTToken(jwtToken);
     if (await userHasRoom(uid)) {
-      console.log("user already has room");
       socket.emit("createroom", await getRoomForUser(uid));
     } else {
       // Create a new room and respond back to frontend with the room path
       const room = await generateRoom(uid);
-      console.log("new room is created for user");
       socket.emit("createroom", room);
     }
   });
@@ -94,29 +89,23 @@ io.on("connection", (socket) => {
       if (session.sessionCreatorId === uid) {
         // Interviewer
         await socket.join(roomId);
-        console.log("interviewer joined room");
       } else {
         // Non-interviewer
         await socket.join(roomId);
-        console.log("non-interviewer joined room");
       }
-      console.log("joined room id: ", socket.rooms);
       socket.emit("bind_room_user", { status: "Success" });
     } else {
       console.log("Invalid session.");
-      socket.emit("bind_room_user", { status: "Failed", reason: "Invalid session" });
+      socket.emit("bind_room_user", { status: "Failed" });
     }
   });
 
   // Get all users in a room
   socket.on("get_room_users", (msg) => {
-    console.log("received request to retrieve room users");
     const { roomId } = msg;
     const room = io.sockets.adapter.rooms.get(roomId); // Get the room object
     const usersInRoom = room ? Array.from(room) : []; // Get all socket IDs in the room
 
-    console.log("Users in room");
-    console.log(usersInRoom);
     socket.emit("get_room_users", usersInRoom);
   });
 
@@ -181,7 +170,6 @@ io.on("connection", (socket) => {
     };
 
     // Notify other users in the room that someone joined
-    console.log(socket.rooms);
     socket.to(roomId).emit("participant_joined", {
       userId: socket.id,
       userName: socket.userData.userName,
@@ -192,12 +180,10 @@ io.on("connection", (socket) => {
 
     // Send the current participant list of all **other** users to the newly joined user
     socket.emit("participants_list", participantsList);
-    console.log(`User ${socket.userData.userName} joined room ${roomId}`);
   });
 
   // Checks if remote peer is ready for peer connection
   socket.on("peer_ready", (data) => {
-    console.log("peer message received");
     const { roomId, ready } = data;
     socket.to(roomId).emit("peer_ready", { ready });
   });
@@ -214,17 +200,13 @@ io.on("connection", (socket) => {
 
   // User leaves a room
   socket.on("leave_room", async (data) => {
-    console.log("received request to leave room");
     const { roomId } = data;
-
     if (socket.userData) {
       // Notify **other** users that current user has left
       socket.to(roomId).emit("participant_left", {
         userId: socket.id,
         userName: socket.userData.userName,
       });
-
-      console.log(`User ${socket.userData.userName} left room ${roomId}`);
     }
 
     // Leave the room
@@ -233,7 +215,6 @@ io.on("connection", (socket) => {
 
   // Media state change (video/audio toggle)
   socket.on("media_state_change", (data) => {
-    // console.log("media state change request received by user " + socket.userData.userName)
     const { roomId, mediaType, isOn } = data;
 
     // Update socket user data
@@ -271,12 +252,10 @@ io.on("connection", (socket) => {
     // The metadata will be one of three things: offer from caller, ice candidates, or answer to offer by receiver
     // For offer, send to other users in room
     if (data.offer) {
-      console.log("offer received: " + data.offer);
       socket.to(data.roomId).emit("incoming-offer", { offer: data.offer });
     }
     // For answer to offer
     else if (data.answer) {
-      console.log("answer received: " + data.answer);
       socket.to(data.roomId).emit("incoming-answer", { answer: data.answer });
     }
     // For ice candidates
@@ -288,19 +267,6 @@ io.on("connection", (socket) => {
       socket.to(data.roomId).emit("close-peer", { closePeerConn: true });
     }
   });
-
-  // Handle disconnections
-  // socket.on("disconnect", () => {
-  //   if (socket.userData && socket.userData.roomId) {
-  //     // Notify users in room that this participant has left
-  //     socket.to(socket.userData.roomId).emit("participant_left", {
-  //       userId: socket.id,
-  //       userName: socket.userData.userName,
-  //     });
-
-  //     console.log(`User ${socket.userData.userName} disconnected from room ${socket.userData.roomId}`);
-  //   }
-  // });
 
   // Helper function to get all participants in a room
   function getParticipantsInRoom(roomId) {

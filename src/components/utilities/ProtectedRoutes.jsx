@@ -13,7 +13,6 @@ const ProtectedRoute = ({ element, ...rest }) => {
   useEffect(() => {
     const checkAuthentication = async () => {
       const authenticated = await isAuthenticated();
-      console.log("is user authenticated: ", authenticated);
       if (authenticated) {
         setIsAuthenticatedState(authenticated);
       }
